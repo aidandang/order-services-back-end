@@ -89,6 +89,25 @@ const receivingSchema = new Schema({
   }
 })
 
+const statusSchema = new Schema({
+  type: {
+    type: String,
+    required: true,
+    default: 'created',
+    enum: ['created', 'ordered', 'received', 'shipped', 'delivered']
+  },
+  date: {
+    type: Date,
+    required: true,
+    default: Date.now
+  },
+  code: {
+    type: String,
+    required: true,
+    default: 'na'
+  }
+})
+
 const orderSchema = new Schema({
   info: {
     type: infoSchema
@@ -105,6 +124,9 @@ const orderSchema = new Schema({
   customer: {
     type: Object,
     required: true
+  },
+  status: {
+    type: statusSchema
   },
   createdAt: {
     type: Date,
