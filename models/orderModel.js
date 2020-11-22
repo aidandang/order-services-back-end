@@ -78,10 +78,12 @@ const receivingSchema = new Schema({
     require: true
   },
   tracking: {
-    type: String
+    type: String,
+    default: ''
   },
   recvDate: {
-    type: Date
+    type: String,
+    default: ''
   },
   warehouse: {
     type: Object,
@@ -94,7 +96,7 @@ const statusSchema = new Schema({
     type: String,
     required: true,
     default: 'created',
-    enum: ['created', 'ordered', 'received', 'shipped', 'delivered']
+    enum: ['created', 'ordered', 'received', 'shipped', 'delivered', 'cancelled']
   },
   date: {
     type: Date,
@@ -136,6 +138,9 @@ const orderSchema = new Schema({
     type: Array
   },
   createdBy: {
+    type: Object
+  },
+  rev: {
     type: Object
   }
 });
