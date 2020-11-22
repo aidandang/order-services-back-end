@@ -94,6 +94,23 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
   const match = { _id: ObjectId(id) }
   const order = await Order.aggregate(orderAggregate(match))
 
+  let rev = {};
+  let obj = {};
+
+  if (order.length > 0) {
+    obj = { ...order[0] }
+    delete obj.rev;
+    rev = { ...order[0].rev }
+    rev[Date.now()] = { ...obj }
+  }
+
+  if (Object.keys(rev).length > 0) {
+    await Order.findByIdAndUpdate(
+      id,
+      { rev }
+    )
+  }  
+
   res
     .status(200)
     .json({
