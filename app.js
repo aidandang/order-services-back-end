@@ -16,6 +16,7 @@ const brandRouter = require('./routes/brandRoutes');
 const orderRouter = require('./routes/orderRoutes');
 const merchantRouter = require('./routes/merchantRoutes');
 const warehouseRouter = require('./routes/warehouseRoutes');
+const receivingRouter = require('./routes/receivingRoutes');
 
 // middleware
 app.use(morgan('dev'));
@@ -33,6 +34,7 @@ app.use('/api/v1/brands', brandRouter);
 app.use('/api/v1/orders', orderRouter);
 app.use('/api/v1/merchants', merchantRouter); 
 app.use('/api/v1/warehouses', warehouseRouter);
+app.use('/api/v1/receiving', receivingRouter);
 
 // all other routes are not found
 app.all('*', (req, res, next) => {
