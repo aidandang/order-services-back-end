@@ -12,12 +12,12 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
   let match = null;
 
   if (req.query.tracking) {
-    name = req.query.name;
+    tracking = req.query.tracking;
     match = {
       '$expr': {
           $regexMatch: {
           input: "$tracking",
-          regex: name,
+          regex: tracking,
           options: "i"
         }
       } 
@@ -52,6 +52,10 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
   const limit = req.query.limit * 1 || 6;
   const skip = (page - 1) * limit;
 
+  const arr = await query;
+  const count = arr.length;
+  const pages = Math.ceil(count/limit);
+
   query = query.skip(skip).limit(limit);
 
   const trackings = await query; 
@@ -69,7 +73,7 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
 });
 
 exports.createTracking = catchAsync(async (req, res, next) => {
-  const newtracking = await Receiving.create(req.body);
+  const newtracking = await Receiving.insertMany(req.body);
 
   res.status(201).json({
     status: 'success',
