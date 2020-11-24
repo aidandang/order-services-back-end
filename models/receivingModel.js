@@ -8,12 +8,11 @@ const receivingSchema = new Schema({
     unique: true
   },
   recvDate: {
-    type: String,
+    type: Date,
     required: true
   },
   orderRef: {
     type: String,
-    required: true,
     default: ''
   },
   createdAt: {
