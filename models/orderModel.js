@@ -20,6 +20,10 @@ const infoSchema = new Schema({
   orderType: {
     type: String,
     required: true
+  },
+  warehouse: {
+    type: Object,
+    required: true
   }
 })
 
@@ -58,7 +62,10 @@ const itemSchema = new Schema({
   },
   note: {
     type: String
-  }
+  },
+  receiving: {
+    type: Object
+  } 
 });
 
 const costSchema = new Schema({
@@ -72,25 +79,6 @@ const costSchema = new Schema({
   }
 })
 
-const receivingSchema = new Schema({
-  status: {
-    type: String,
-    require: true
-  },
-  tracking: {
-    type: String,
-    default: ''
-  },
-  recvDate: {
-    type: String,
-    default: ''
-  },
-  warehouse: {
-    type: Object,
-    require: true
-  }
-})
-
 const statusSchema = new Schema({
   type: {
     type: String,
@@ -98,15 +86,10 @@ const statusSchema = new Schema({
     default: 'created',
     enum: ['created', 'ordered', 'received', 'shipped', 'delivered', 'cancelled']
   },
-  date: {
-    type: Date,
-    required: true,
-    default: Date.now
-  },
   code: {
     type: String,
     required: true,
-    default: 'na'
+    default: 'Not available'
   }
 })
 
@@ -119,9 +102,6 @@ const orderSchema = new Schema({
   },
   cost: {
     type: costSchema
-  },
-  receiving: {
-    type: receivingSchema
   },
   customer: {
     type: Object,

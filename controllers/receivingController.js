@@ -108,3 +108,29 @@ exports.deleteTracking = catchAsync(async (req, res, next) => {
       byId: tracking
     });
 });
+
+exports.updateTrackingToOrder = catchAsync(async (req, res, next) => {
+  const queryObj = req.body;
+  let tracking = null;
+
+  if (queryObj.tracking && queryObj.orderRef) {
+    tracking = await Receiving.findOneAndUpdate(
+      {
+        tracking: queryObj.tracking
+      },
+      {
+        orderRef: queryObj.orderRef
+      },
+      { new: true, runValidators: true }
+    );
+  }
+
+  if (!tracking) return next(new AppError('No tracking found.', 404))
+  
+  res
+    .status(200)
+    .json({
+      status: 'success',
+      byId: tracking
+    });
+})

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const Order = require('../models/orderModel');
+const Receiving = require('../models/receivingModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { orderAggregate } = require('../utils/aggregation');
@@ -80,7 +81,7 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
 exports.updateOrderById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const queryObj = {...req.body};
-
+  
   const updateOrder = await Order.findByIdAndUpdate(
     id, 
     queryObj, 
