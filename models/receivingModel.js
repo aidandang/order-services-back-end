@@ -11,9 +11,14 @@ const receivingSchema = new Schema({
     type: Date,
     required: true
   },
-  orderRef: {
+  warehouse: {
     type: String,
-    default: ''
+    required: true,
+    default: "5f9afc8fac9c490cd193b3ee"
+  },
+  note: {
+    type: String,
+    default: "Checked"
   },
   createdAt: {
     type: Date,
