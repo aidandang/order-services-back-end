@@ -22,13 +22,13 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
         }
       } 
     };  
-  } else if (req.query.orderRef) {
-    orderRef = req.query.orderRef;
+  } else if (req.query.status) {
+    status = req.query.status;
     match = {
       '$expr': {
         $regexMatch: {
-          input: "$orderRef",
-          regex: orderRef,
+          input: "$status",
+          regex: status,
           options: "i"
         } 
       } 
@@ -58,9 +58,7 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
 
   query = query.skip(skip).limit(limit);
 
-  const trackings = await query; 
-
-  if (trackings.length === 0) return next(new AppError('No tracking found.', 404))
+  const trackings = await query;
 
   res.status(200).json({
     status: 'success',
@@ -108,29 +106,3 @@ exports.deleteTracking = catchAsync(async (req, res, next) => {
       byId: tracking
     });
 });
-
-exports.updateTrackingToOrder = catchAsync(async (req, res, next) => {
-  const queryObj = req.body;
-  let tracking = null;
-
-  if (queryObj.tracking && queryObj.orderRef) {
-    tracking = await Receiving.findOneAndUpdate(
-      {
-        tracking: queryObj.tracking
-      },
-      {
-        orderRef: queryObj.orderRef
-      },
-      { new: true, runValidators: true }
-    );
-  }
-
-  if (!tracking) return next(new AppError('No tracking found.', 404))
-  
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      byId: tracking
-    });
-})

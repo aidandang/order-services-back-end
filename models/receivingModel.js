@@ -16,9 +16,16 @@ const receivingSchema = new Schema({
     required: true,
     default: "5f9afc8fac9c490cd193b3ee"
   },
-  note: {
+  procDate: {
+    type: Date
+  },
+  status: {
     type: String,
-    default: "Checked"
+    enum: ['scanned', 'processed'],
+    default: 'scanned'
+  },
+  orderRef: {
+    type: Array
   },
   createdAt: {
     type: Date,

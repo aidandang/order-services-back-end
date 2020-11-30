@@ -79,20 +79,6 @@ const costSchema = new Schema({
   }
 })
 
-const statusSchema = new Schema({
-  type: {
-    type: String,
-    required: true,
-    default: 'created',
-    enum: ['created', 'ordered', 'received', 'shipped', 'delivered', 'cancelled']
-  },
-  code: {
-    type: String,
-    required: true,
-    default: 'Not available'
-  }
-})
-
 const orderSchema = new Schema({
   info: {
     type: infoSchema
@@ -108,7 +94,10 @@ const orderSchema = new Schema({
     required: true
   },
   status: {
-    type: statusSchema
+    type: String,
+    required: true,
+    default: 'created',
+    enum: ['created', 'ordered', 'received', 'shipped', 'delivered', 'cancelled']
   },
   createdAt: {
     type: Date,
