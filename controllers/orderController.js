@@ -24,6 +24,17 @@ exports.readOrders = catchAsync(async (req, res, next) => {
         $eq: parseInt(orderNumber)
       } 
     };  
+  } else if (req.query.status) {
+    status = req.query.status;
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: "$status",
+          regex: status,
+          options: "i"
+        } 
+      } 
+    }
   }
 
   if (match === null) {
