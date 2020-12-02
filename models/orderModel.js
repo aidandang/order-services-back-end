@@ -63,8 +63,8 @@ const itemSchema = new Schema({
   note: {
     type: String
   },
-  receiving: {
-    type: Object
+  tracking: {
+    type: String
   } 
 });
 

@@ -33,6 +33,17 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
         } 
       } 
     };  
+  } else if (req.query.recvDate) {
+    recvDate = req.query.recvDate;
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: { $dateToString: { format: "%Y-%m-%d", date: "$recvDate" } },
+          regex: recvDate,
+          options: "i"
+        }
+      }
+    }
   }
 
   if (match === null) {
