@@ -17,11 +17,13 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 exports.readOrders = catchAsync(async (req, res, next) => {
   let match = null;
 
-  if (req.query.orderNumber) {
-    orderNumber = req.query.orderNumber;
+  console.log(req.query.orderRef)
+
+  if (req.query.orderRef) {
+    orderRef = req.query.orderRef;
     match = {
-      orderNumber: { 
-        $eq: parseInt(orderNumber)
+      orderRef: { 
+        $eq: parseInt(orderRef)
       } 
     };  
   } else if (req.query.status) {
@@ -35,7 +37,18 @@ exports.readOrders = catchAsync(async (req, res, next) => {
         } 
       } 
     }
-  }
+  } else if (req.query.orderNumber) {
+    orderNumber = req.query.orderNumber;
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: "$info.orderNumber",
+          regex: orderNumber,
+          options: "i"
+        } 
+      } 
+    }
+  } 
 
   if (match === null) {
     match = {}

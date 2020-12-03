@@ -97,7 +97,17 @@ const orderSchema = new Schema({
     type: String,
     required: true,
     default: 'created',
-    enum: ['created', 'ordered', 'received', 'shipped', 'delivered', 'cancelled']
+    enum: [
+      'created', 
+      'ordered', 
+      'partially-received', 
+      'received', 
+      'parcially-shipped', 
+      'shipped',
+      'parcially-delivered', 
+      'delivered', 
+      'cancelled'
+    ]
   },
   createdAt: {
     type: Date,
