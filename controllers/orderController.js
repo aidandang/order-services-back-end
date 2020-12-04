@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 const Order = require('../models/orderModel');
-const Receiving = require('../models/receivingModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const { orderAggregate } = require('../utils/aggregation');
@@ -17,8 +16,6 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 exports.readOrders = catchAsync(async (req, res, next) => {
   let match = null;
 
-  console.log(req.query.orderRef)
-
   if (req.query.orderRef) {
     orderRef = req.query.orderRef;
     match = {
@@ -27,14 +24,10 @@ exports.readOrders = catchAsync(async (req, res, next) => {
       } 
     };  
   } else if (req.query.status) {
-    status = req.query.status;
+    status = req.query.status.split(',');
     match = {
-      '$expr': {
-        $regexMatch: {
-          input: "$status",
-          regex: status,
-          options: "i"
-        } 
+      status: {
+        $in: status
       } 
     }
   } else if (req.query.orderNumber) {

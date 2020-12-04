@@ -4,11 +4,6 @@ const AppError = require('../utils/appError');
 const { receivingAggregate } = require('../utils/aggregation');
 
 exports.readTrackings = catchAsync(async (req, res, next) => {
-  // delete special keywords in the query
-  const queryObj = { ...req.query };
-  const excludedFields = ['page', 'sort', 'limit', 'fields'];
-  excludedFields.forEach(element => delete queryObj[element]);
-
   let match = null;
 
   if (req.query.tracking) {

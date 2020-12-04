@@ -100,12 +100,11 @@ const orderSchema = new Schema({
     enum: [
       'created', 
       'ordered', 
-      'partially-received', 
       'received', 
-      'parcially-shipped', 
       'shipped',
-      'parcially-delivered', 
-      'delivered', 
+      'delivered',
+      'returned',
+      'processed',
       'cancelled'
     ]
   },
