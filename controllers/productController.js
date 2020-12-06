@@ -6,11 +6,6 @@ const AppError = require('../utils/appError');
 const { productAggregate } = require('../utils/aggregation');
 
 exports.readProducts = catchAsync(async (req, res, next) => {
-  // delete special keywords in the query
-  const queryObj = { ...req.query };
-  const excludedFields = ['page', 'sort', 'limit', 'fields'];
-  excludedFields.forEach(element => delete queryObj[element]);
-
   let match = null;
 
   if (req.query.name) {
