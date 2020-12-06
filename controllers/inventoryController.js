@@ -15,7 +15,7 @@ exports.readInventory = catchAsync(async (req, res, next) => {
       } 
     }
   } else {
-    return next(new AppError('No order found.', 404))
+    return next(new AppError('No Information Found.', 404))
   }
 
   if (match === null) {
@@ -39,6 +39,8 @@ exports.readInventory = catchAsync(async (req, res, next) => {
         } 
       } 
     }; 
+  } else {
+    return next(new AppError('No Information Found.', 404))
   }
   
   if (match === null) {
@@ -55,5 +57,4 @@ exports.readInventory = catchAsync(async (req, res, next) => {
     orders: orderResult,
     trackings: receivingResult
   });
-
 });

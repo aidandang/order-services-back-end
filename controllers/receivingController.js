@@ -51,7 +51,7 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
     const sortBy = req.query.sort.split(',').join(' ');
     query = query.sort(sortBy);
   } else {
-    query = query.sort('createdAt');
+    query = query.sort('-recvDate');
   }
 
   const page = req.query.page * 1 || 1;

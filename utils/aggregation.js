@@ -15,3 +15,9 @@ exports.receivingAggregate = (match) => ([
     $match: match
   }
 ])
+
+exports.shippingAggregate = (match) => ([
+  { 
+    $match: match
+  }
+])
