@@ -5,11 +5,17 @@ const mongoose = require('mongoose'),
 autoIncrement.initialize(mongoose);
 
 const infoSchema = new Schema({
+  warehouse: {
+    type: Object,
+    required: true
+  },
   consignee: {
-    type: Object
+    type: Object,
+    required: true
   },
   courier: {
-    type: Object
+    type: Object,
+    required: true
   },
   shptRef: {
     type: String

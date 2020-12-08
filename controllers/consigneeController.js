@@ -7,7 +7,7 @@ exports.createConsignee = catchAsync(async (req, res, next) => {
   let consignees = null;
 
   if (newConsignee) {
-    consignees = await Consignee.find().sort('fullname');
+    consignees = await Consignee.find().sort('name');
   }
 
   res.status(201).json({
@@ -24,7 +24,7 @@ exports.readConsignees = catchAsync(async (req, res, next) => {
     const sortBy = req.query.sort.split(',').join(' ');
     query = query.sort(sortBy);
   } else {
-    query = query.sort('fullname');
+    query = query.sort('name');
   }
 
   const consignees = await query; 
@@ -45,7 +45,7 @@ exports.updateConsignee = catchAsync(async (req, res, next) => {
   let consignees = null;
 
   if (consignee) {
-    consignees = await Consignee.find().sort('fullname');
+    consignees = await Consignee.find().sort('name');
   }
 
   res
@@ -65,7 +65,7 @@ exports.deleteConsignee = catchAsync(async (req, res, next) => {
   let consignees = null;
 
   if (consignee) {
-    consignees = await Consignee.find().sort('fullname');
+    consignees = await Consignee.find().sort('name');
   }
 
   res
