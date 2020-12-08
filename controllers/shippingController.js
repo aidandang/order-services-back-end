@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const Shipping = require('../models/shippingModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -104,29 +106,43 @@ exports.createShipment = catchAsync(async (req, res, next) => {
 });
 
 exports.updateShipment = catchAsync(async (req, res, next) => {
-  const shipment = await Shipping.findByIdAndUpdate(
-    req.params.id,
-    req.body,
+  const id = req.params.id;
+  const queryObj = { ...req.body };
+
+  const updateShipment = await Shipping.findByIdAndUpdate(
+    id,
+    queryObj,
     { new: true, runValidators: true }
   );
 
+  if (!updateShipment) {
+    return next(new AppError('No shipment found with that Id', 404))
+  }
+
+  const match = { _id: ObjectId(id) };
+  const shipment = await Order.aggregate(orderAggregate(match));
+
+  let rev = {};
+  let obj = {};
+
+  if (shipment.length > 0) {
+    obj = { ...shipment[0] }
+    delete obj.rev;
+    rev = { ...shipment[0].rev }
+    rev[Date.now()] = { ...obj }
+  }
+
+  if (Object.keys(rev).length > 0) {
+    await Order.findByIdAndUpdate(
+      id,
+      { rev }
+    )
+  }  
+
   res
     .status(200)
     .json({
       status: 'success',
-      byId: shipment
+      byId: shipment[0]
     });
 })
-
-exports.deleteShipment = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
-  
-  const shipment = await Shipping.findByIdAndDelete(id);
-
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      byId: shipment
-    });
-});

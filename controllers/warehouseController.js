@@ -1,6 +1,5 @@
 const Warehouse = require('../models/warehouseModel');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
 
 exports.readWarehouses = catchAsync(async (req, res, next) => {
   let query = Warehouse.find();

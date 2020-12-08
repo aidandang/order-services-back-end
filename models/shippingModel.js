@@ -4,10 +4,16 @@ const mongoose = require('mongoose'),
 
 autoIncrement.initialize(mongoose);
 
-const shippingSchema = new Schema({
-  waybill: {
+const infoSchema = new Schema({
+  consignee: {
+    type: Object
+  },
+  courier: {
+    type: Object
+  },
+  shptRef: {
     type: String
-  }, 
+  },
   shptDate: {
     type: Date,
     required: true
@@ -19,35 +25,70 @@ const shippingSchema = new Schema({
   dlvdDate: {
     type: Date
   },
-  status: {
-    type: String,
-    enum: ['created', 'picked-up', 'shipped', 'delivered'],
-    default: 'created'
-  },
-  items: {
-    type: Array,
-    default: []
-  },
   weight: {
     type: Number,
     default: 0
+  }
+})
+
+const itemSchema = new Schema({
+  ordrNumber: {
+    type: String,
+    required: true
   },
+  ordrRef: {
+    type: String,
+    required: true
+  },
+  item: {
+    type: Object,
+    required: true
+  }
+})
+
+const costSchema = new Schema({
   shptCost: {
     type: Number,
     default: 0
   },
-  courier: {
-    type: Object
+  saleTax: {
+    type: Number,
+    default: 0
+  }
+})
+
+const shippingSchema = new Schema({
+  info: {
+    type: infoSchema,
+    required: true
   },
-  consignee: {
-    type: Object
+  items: {
+    type: [itemSchema]
+  },
+  cost: {
+    type: costSchema
+  },
+  status: {
+    type: String,
+    required: true,
+    enum: ['created', 'picked-up', 'shipped', 'delivered'],
+    default: 'created'
   },
   note: {
     type: String
   },
+  attachments: {
+    type: Array
+  },
+  createdBy: {
+    type: Object
+  },
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  rev: {
+    type: Object
   }
 });
 
