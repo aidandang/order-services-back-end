@@ -4,99 +4,86 @@ const mongoose = require('mongoose'),
 
 autoIncrement.initialize(mongoose);
 
-const infoSchema = new Schema({
+const purchasingSchema = new Schema({
   merchant: {
     type: Object,
-    required: true
-  },
-  orderNumber: {
-    type: String,
-    required: true
-  },
-  orderDate: {
-    type: Date,
-    required: true
-  },
-  orderType: {
-    type: String,
     required: true
   },
   warehouse: {
     type: Object,
     required: true
-  }
-})
-
-const itemSchema = new Schema({
-  product: {
-    type: Object,
-    required: true
   },
-  color: {
-    type: Object,
-    required: true
-  },
-  size: {
+  orderNumber: {
     type: String,
-    default: 'one-size'
+    required: true,
+    index: true
   },
-  qty: {
-    type: Number,
+  orderDate: {
+    type: Date,
     required: true
   },
-  price: {
-    type: Number,
-    required: true
+  type: {
+    type: String,
+    required: true,
+    enum: ['online', 'walk-in', 'customer']
   },
-  salePrice: {
+  itemsCost: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  salesTax: {
     type: Number,
     default: 0
   },
-  weight: {
+  shippingCost: {
     type: Number,
+    default: 0
+  },
+  otherCost: {
+    type: Number,
+    default: 0
+  },
+  totalCost: {
+    type: Number,
+    required: true,
+    default: 0
+  }
+})
+
+const sellingSchema = new Schema({
+  customer: {
+    type: Object,
+    required: true
+  },
+  itemsPrice: {
+    type: Number,
+    required: true,
     default: 0
   },
   shippingPrice: {
     type: Number,
     default: 0
   },
-  note: {
-    type: String
-  },
-  tracking: {
-    type: String
-  } 
-});
-
-const costSchema = new Schema({
-  shippingCost: {
+  salesTax: {
     type: Number,
     default: 0
   },
-  saleTax: {
+  discount: {
     type: Number,
+    default: 0
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
     default: 0
   }
 })
 
 const orderSchema = new Schema({
-  info: {
-    type: infoSchema
-  },
-  items: {
-    type: [itemSchema]
-  },
-  cost: {
-    type: costSchema
-  },
-  customer: {
-    type: Object,
-    required: true
-  },
   status: {
     type: String,
     required: true,
-    default: 'created',
     enum: [
       'created', 
       'ordered', 
@@ -106,26 +93,33 @@ const orderSchema = new Schema({
       'returned',
       'processed',
       'cancelled'
-    ]
+    ],
+    index: true
+  },
+  purchasing: {
+    type: purchasingSchema
+  },
+  selling: {
+    type: sellingSchema
+  },
+  attachments: {
+    type: Array
+  },
+  rev: {
+    type: Object
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
-  attachments: {
-    type: Array
-  },
   createdBy: {
-    type: Object
-  },
-  rev: {
     type: Object
   }
 });
 
 orderSchema.plugin(autoIncrement.plugin, {
   model: 'Order',
-  field: 'orderRef',
+  field: 'orderNumber',
   startAt: 1,
   incrementBy: 1
 });
