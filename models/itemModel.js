@@ -1,49 +1,6 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema
 
-const costSchema = new Schema({
-  itemCost: {
-    type: Number,
-    required: true
-  },
-  salesTax: {
-    type: Number,
-    default: 0
-  },
-  shippingCost: {
-    type: Number,
-    default: 0
-  },
-  otherCost: {
-    type: Number,
-    default: 0
-  },
-  totalCost: {
-    type: Number,
-    required: true
-  }
-})
-
-const priceSchema = new Schema({
-  itemPrice: {
-    type: Number,
-    required: true
-  },
-  salesTax: {
-    type: Number,
-    default: 0
-  },
-  shippingPrice: {
-    type: Number,
-    default: 0
-  },
-  totalPrice: {
-    type: Number,
-    required: true,
-    default: 0
-  }
-})
-
 const itemSchema = new Schema({
   orderNumber: {
     type: Number,
@@ -66,15 +23,21 @@ const itemSchema = new Schema({
     type: Number,
     required: true
   },
+  cost: {
+    type: Number,
+    required: true
+  },
   weight: {
     type: Number,
     default: 0
   },
-  cost: {
-    type: costSchema
-  },
   price: {
-    type: priceSchema
+    type: Number,
+    required: true
+  },
+  shippingPrice: {
+    type: Number,
+    required: true
   },
   receivingNumber: {
     type: String,
