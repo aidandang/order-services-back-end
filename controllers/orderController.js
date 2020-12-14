@@ -1,3 +1,5 @@
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 const Order = require('../models/orderModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
@@ -78,15 +80,36 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
 
   // find order with provided id 
   // and return error if order is not found
-  // otherwise return a success response
-  const order = await Order.findOne({ _id: id })
+  // otherwise get items then return a success response
+  const order = await Order.aggregate([
+    { 
+      $match: {
+        _id: ObjectId(id)
+      } 
+    },
+    {
+      $lookup: {
+        from: 'item',
+        localField: 'orderNumber',
+        foreignField: 'orderNumber',
+        as: 'item'
+      }      
+    },
+    { 
+      $sort: {
+        'item.createdAt': -1
+      }
+    }
+  ])
 
-  if (!order) return next(new AppError('No order found.', 404))
-  
-  res.status(200).json({
-    status: 'success',
-    byId: order
-  })
+  if (order.length === 0) { 
+    return next(new AppError('No order found.', 404)) 
+  } else {
+    res.status(200).json({
+      status: 'success',
+      byId: order[0]
+    })
+  }
 })
 
 exports.createOrder = catchAsync(async (req, res, next) => {
@@ -110,7 +133,7 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
   // as a new revision
   
   // check if order found, return error if not
-  const found = await Order.find({ _id: id })
+  const found = await Order.findOne({ _id: id })
 
   if (!found) return next(new AppError('No order found.', 404))
 
