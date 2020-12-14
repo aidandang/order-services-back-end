@@ -21,3 +21,9 @@ exports.shippingAggregate = (match) => ([
     $match: match
   }
 ])
+
+exports.itemAggregate = (match) => ([
+  { 
+    $match: match
+  }
+])

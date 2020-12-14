@@ -15,7 +15,7 @@ exports.readItems = catchAsync(async (req, res, next) => {
   if (queryObj.orderNumber) {
     orderNumber = queryObj.orderNumber.split(',')
     match.orderNumber = {
-      $in: parseInt(orderNumber)
+      $in: orderNumber
     }
   }
   if (queryObj.itemStatus) { 
@@ -74,7 +74,7 @@ exports.createItem = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateItemById = catchAsync(async (req, res, next) => {
+exports.updateItem = catchAsync(async (req, res, next) => {
   const id = req.params.id;
   const obj = { ...req.body };
 
