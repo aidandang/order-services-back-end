@@ -78,9 +78,10 @@ exports.readOrders = catchAsync(async (req, res, next) => {
 exports.readOrderById = catchAsync(async (req, res, next) => {
   const id = req.params.id;
 
-  // find order with provided id 
-  // and return error if order is not found
-  // otherwise get items then return a success response
+  // find the order with a provided id, 
+  // look up in item collection to get items of the order
+  // and return error if the order is not found
+  // otherwise return the order with items sorted by createdAt
   const order = await Order.aggregate([
     { 
       $match: {
@@ -92,7 +93,7 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
         from: 'item',
         localField: 'orderNumber',
         foreignField: 'orderNumber',
-        as: 'item'
+        as: 'items'
       }      
     },
     { 

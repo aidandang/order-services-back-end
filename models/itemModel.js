@@ -23,7 +23,11 @@ const itemSchema = new Schema({
     type: Number,
     required: true
   },
-  cost: {
+  unitCost: {
+    type: Number,
+    required: true
+  },
+  itemCost: {
     type: Number,
     required: true
   },
