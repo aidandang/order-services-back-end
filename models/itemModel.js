@@ -37,11 +37,13 @@ const itemSchema = new Schema({
   },
   price: {
     type: Number,
-    required: true
+    required: true,
+    default: 0
   },
   shippingPrice: {
     type: Number,
-    required: true
+    required: true,
+    default: 0
   },
   receivingNumber: {
     type: String,

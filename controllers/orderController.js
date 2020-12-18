@@ -1,9 +1,11 @@
-const mongoose = require('mongoose');
-const ObjectId = mongoose.Types.ObjectId;
-const Order = require('../models/orderModel');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const { orderAggregate } = require('../utils/aggregation');
+const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
+const Order = require('../models/orderModel')
+const Item = require('../models/itemModel')
+const catchAsync = require('../utils/catchAsync')
+const AppError = require('../utils/appError')
+const { orderAggregate } = require('../utils/aggregation')
+const { update } = require('../models/orderModel')
 
 exports.readOrders = catchAsync(async (req, res, next) => {
   const queryObj = { ...req.query }
@@ -16,14 +18,14 @@ exports.readOrders = catchAsync(async (req, res, next) => {
   var purchasingNumber = null
 
   if (queryObj.orderNumber) {
-    orderNumber = queryObj.orderNumber.split(',');
+    orderNumber = queryObj.orderNumber.split(',')
     match.orderNumber = {
       $in: orderNumber
-    };  
+    }  
   } 
   
   if (queryObj.orderStatus) {
-    orderStatus = queryObj.orderStatus.split(',');
+    orderStatus = queryObj.orderStatus.split(',')
     match = {
       status: {
         $in: orderStatus
@@ -32,7 +34,7 @@ exports.readOrders = catchAsync(async (req, res, next) => {
   } 
 
   if (queryObj.purchasingNumber) {
-    purchasingNumber = queryObj.purchasingNumber;
+    purchasingNumber = queryObj.purchasingNumber
     match['$expr'] = {
       $regexMatch: {
         input: "$purchasingNumber",
@@ -51,19 +53,19 @@ exports.readOrders = catchAsync(async (req, res, next) => {
 
   // sort and paginate found orders
   if (queryObj.sort) {
-    query = query.sort(query.sort.split(',').join(' '));
+    query = query.sort(query.sort.split(',').join(' '))
   } else {
-    query = query.sort('-createdAt');
+    query = query.sort('-createdAt')
   }
 
-  const page = queryObj.page * 1 || 1;
-  const limit = queryObj.limit * 1 || 20;
-  const skip = (page - 1) * limit;
-  const pages = Math.ceil(count/limit);
+  const page = queryObj.page * 1 || 1
+  const limit = queryObj.limit * 1 || 20
+  const skip = (page - 1) * limit
+  const pages = Math.ceil(count/limit)
 
-  query = query.skip(skip).limit(limit);
+  query = query.skip(skip).limit(limit)
   
-  const orders = await query;
+  const orders = await query
 
   res.status(200).json({
     status: 'success',
@@ -76,7 +78,7 @@ exports.readOrders = catchAsync(async (req, res, next) => {
 })
 
 exports.readOrderById = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+  const id = req.params.id
 
   // find the order with a provided id, 
   // look up in item collection to get items of the order
@@ -90,7 +92,7 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
     },
     {
       $lookup: {
-        from: 'item',
+        from: 'items',
         localField: 'orderNumber',
         foreignField: 'orderNumber',
         as: 'items'
@@ -118,17 +120,19 @@ exports.createOrder = catchAsync(async (req, res, next) => {
 
   // create new order and return a success response
   // with that new order
-  const newOrder = await Order.create(obj);
+  const newOrder = await Order.create(obj)
   
   res.status(201).json({
     status: 'success',
     byId: newOrder
-  });
-});
+  })
+})
 
 exports.updateOrderById = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
-  const obj = {...req.body};
+  const id = req.params.id
+  const obj = { ...req.body }
+  delete obj.items
+  const items = [ ...req.body.items ]
 
   // before updating, the existing order needed to saved
   // as a new revision
@@ -143,7 +147,7 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
   // with the key name is a time stamp 
   const rev = { ...found.rev }
   const existingOrder = { ...found }
-  delete existingOrder.rev;
+  delete existingOrder.rev
 
   rev[Date.now()] = { ...existingOrder }
 
@@ -156,6 +160,64 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
     obj, 
     { new: true, runValidators: true }
   )
+
+  // update multile items to items collection
+  // if updating items have any item without _id then insert that item as a new one
+  // if existing items of the order have any item that updating items don't have 
+  // then delete that item
+
+  // get existing items
+  const existingItems = Item.find({ orderNumber: obj.orderNumber })
+  
+  const query = []
+  var i = 0
+
+  // add update and create operations to query
+  for (i = 0; i < items.length; i++) {
+    if (items[i]._id) {
+      query.push({
+        updateOne: {
+          "filter": { _id: items[i]._id },
+          "update": items[i]
+        }
+      })
+    } else {
+      query.push({
+        insertOne: {
+          "document": items[i]
+        }
+      })
+    }
+  }
+
+  // add delete operations to query
+  for (i = 0; i < existingItems.length; i++) {
+    if (existingItems[i]._id) {
+      var j = 0
+      var isDelete = true
+      for (j = 0; j < items.length; j++) {
+        if (existingItems[i]._id === items[j]._id) {
+          isDelete = false
+        }
+      }
+      if (isDelete) {
+        query.push({
+          deleteOne: {
+            "filter": { _id: existingItems[i]._id }
+          }
+        })
+      }
+    }  
+  }
+
+  const result = await Item.bulkWrite(query)
+
+  console.log(result)
+  console.log(query)
+
+  // get updated items and add to the updated orders
+  const updatedItems = await Item.find({ orderNumber: obj.orderNumber })
+  updated.items = updatedItems
 
   res
     .status(200)
