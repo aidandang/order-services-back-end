@@ -28,13 +28,13 @@ exports.readItems = catchAsync(async (req, res, next) => {
   if (Object.keys(match).length === 0) return next(new AppError('No item found.', 404))
 
   // find items and response to the request if success,
-  // items retured would be an empty array if there is no found
-  let query = Item.aggregate(itemAggregate(match))
+  // items retured would be an empty array if not found
+  let query = Item.aggregate([{ $match: match }])
 
   if (queryObj.sort) {
-    query.sort(queryObj.sort.split(',').join(' '))
+    query = query.sort(queryObj.sort.split(',').join(' '))
   } else {
-    query.sort('-createdAt')
+    query = query.sort('-createdAt')
   }
 
   const items = await query
