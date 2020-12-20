@@ -37,6 +37,16 @@ const costingSchema = new Schema({
   otherCost: {
     type: Number,
     default: 0
+  },
+  totalCost: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  paidAmount: {
+    type: Number,
+    required: true,
+    default: 0
   }
 })
 
@@ -69,14 +79,9 @@ const orderSchema = new Schema({
     type: String,
     required: true,
     enum: [
-      'created', 
-      'ordered', 
-      'received', 
-      'shipped',
-      'delivered',
-      'returned',
-      'processed',
-      'cancelled'
+      'created',
+      'editing', 
+      'ordered'
     ],
     index: true
   },
@@ -84,7 +89,8 @@ const orderSchema = new Schema({
     type: purchasingSchema
   },
   costing: {
-    type: costingSchema
+    type: costingSchema,
+    required: true
   },
   selling: {
     type: sellingSchema

@@ -2,10 +2,32 @@ const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
 const Order = require('../models/orderModel')
 const Item = require('../models/itemModel')
+const Revision = require('../models/revisionModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const { orderAggregate } = require('../utils/aggregation')
-const { update } = require('../models/orderModel')
+
+// set order aggregate query to request an order by Id
+const getByIdAggr = (id) => ([
+  { 
+    $match: {
+      _id: ObjectId(id)
+    } 
+  },
+  {
+    $lookup: {
+      from: 'items',
+      localField: 'orderNumber',
+      foreignField: 'orderNumber',
+      as: 'items'
+    }      
+  },
+  { 
+    $sort: {
+      'item.createdAt': -1
+    }
+  }
+])
 
 exports.readOrders = catchAsync(async (req, res, next) => {
   const queryObj = { ...req.query }
@@ -84,26 +106,7 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
   // look up in item collection to get items of the order
   // and return error if the order is not found
   // otherwise return the order with items sorted by createdAt
-  const order = await Order.aggregate([
-    { 
-      $match: {
-        _id: ObjectId(id)
-      } 
-    },
-    {
-      $lookup: {
-        from: 'items',
-        localField: 'orderNumber',
-        foreignField: 'orderNumber',
-        as: 'items'
-      }      
-    },
-    { 
-      $sort: {
-        'item.createdAt': -1
-      }
-    }
-  ])
+  const order = await Order.aggregate(getByIdAggr(id))
 
   if (order.length === 0) { 
     return next(new AppError('No order found.', 404)) 
@@ -142,32 +145,32 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
 
   if (!found) return next(new AppError('No order found.', 404))
 
-  // copy 'rev' (revision) element from found order
-  // and create a new revision to this existing order
-  // with the key name is a time stamp 
-  const rev = { ...found.rev }
-  const existingOrder = { ...found }
-  delete existingOrder.rev
+  // get existing items
+  const existingItems = await Item.find({ orderNumber: found.orderNumber })
 
-  rev[Date.now()] = { ...existingOrder }
+  // create a new revision to this existing order
+  const orderRev = {
+    collectionName: 'orders',
+    documentId: found._id,
+    revision: {
+      order: { ...found },
+      items: [ ...existingItems ]
+    }
+  }
 
-  // added the new rev to req body then update,
-  // return a success response with updated order
-  obj.rev = rev
+  await Revision.create(orderRev)
 
+  // update order
   const updated = await Order.findByIdAndUpdate(
     id, 
     obj, 
-    { new: true, runValidators: true }
+    { runValidators: true }
   )
 
   // update multile items to items collection
   // if updating items have any item without _id then insert that item as a new one
   // if existing items of the order have any item that updating items don't have 
   // then delete that item
-
-  // get existing items
-  const existingItems = Item.find({ orderNumber: obj.orderNumber })
   
   const query = []
   var i = 0
@@ -191,38 +194,32 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
   }
 
   // add delete operations to query
+  var j = 0
   for (i = 0; i < existingItems.length; i++) {
-    if (existingItems[i]._id) {
-      var j = 0
-      var isDelete = true
-      for (j = 0; j < items.length; j++) {
-        if (existingItems[i]._id === items[j]._id) {
-          isDelete = false
+    var isDelete = true
+    for (j = 0; j < items.length; j++) {
+      if (existingItems[i]._id == items[j]._id) {
+        isDelete = false
+      }
+    }
+    if (isDelete) {
+      query.push({
+        deleteOne: {
+          "filter": { _id: existingItems[i]._id }
         }
-      }
-      if (isDelete) {
-        query.push({
-          deleteOne: {
-            "filter": { _id: existingItems[i]._id }
-          }
-        })
-      }
-    }  
+      })
+    }
   }
 
-  const result = await Item.bulkWrite(query)
+  await Item.bulkWrite(query)
 
-  console.log(result)
-  console.log(query)
-
-  // get updated items and add to the updated orders
-  const updatedItems = await Item.find({ orderNumber: obj.orderNumber })
-  updated.items = updatedItems
+  // get updated orders
+  const order = await Order.aggregate(getByIdAggr(id))
 
   res
     .status(200)
     .json({
       status: 'success',
-      byId: updated
+      byId: order[0]
     })
 })
