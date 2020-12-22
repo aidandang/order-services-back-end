@@ -62,6 +62,7 @@ const sellingSchema = new Schema({
   },
   shippingPrice: {
     type: Number,
+    required: true,
     default: 0
   },
   salesTax: {
@@ -70,6 +71,11 @@ const sellingSchema = new Schema({
   },
   discount: {
     type: Number,
+    default: 0
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
     default: 0
   }
 })
