@@ -21,8 +21,8 @@ const receivingSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ['scanned', 'processed'],
-    default: 'scanned'
+    enum: ['received', 'processed'],
+    default: 'received'
   },
   orderRef: {
     type: Array

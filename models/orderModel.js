@@ -55,11 +55,6 @@ const sellingSchema = new Schema({
     type: Object,
     required: true
   },
-  itemsPrice: {
-    type: Number,
-    required: true,
-    default: 0
-  },
   shippingPrice: {
     type: Number,
     required: true,
@@ -77,6 +72,11 @@ const sellingSchema = new Schema({
     type: Number,
     required: true,
     default: 0
+  },
+  exRate: {
+    type: Number,
+    required: true,
+    default: 24000
   }
 })
 
