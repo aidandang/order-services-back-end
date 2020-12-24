@@ -31,19 +31,29 @@ const itemSchema = new Schema({
     type: Number,
     required: true
   },
+  purTaxPct: {
+    type: Number,
+    required: true,
+    default: 0
+  },
   weight: {
     type: Number,
     default: 0
   },
-  price: {
+  shippingDong: {
     type: Number,
     required: true,
     default: 0
   },
-  shippingPrice: {
+  totalDong: {
     type: Number,
     required: true,
     default: 0
+  },
+  exRate: {
+    type: Number,
+    required: true,
+    default: 24000
   },
   receivingNumber: {
     type: String,
@@ -56,8 +66,8 @@ const itemSchema = new Schema({
   status: {
     type: String,
     required: true,
-    default: 'ordered',
-    enum: ['ordered', 'received', 'shipped', 'delivered'],
+    default: 'editing',
+    enum: ['editing', 'ordered', 'received', 'shipped', 'delivered'],
     index: true
   },
   attachments: {
