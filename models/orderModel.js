@@ -25,7 +25,7 @@ const purchasingSchema = new Schema({
   type: {
     type: String,
     required: true,
-    enum: ['online', 'walk-in', 'customer']
+    enum: ['online', 'walk-in', 'shipping']
   }
 })
 

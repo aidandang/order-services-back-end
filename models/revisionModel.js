@@ -4,7 +4,7 @@ const revisionSchema = new Schema({
   collectionName: {
     type: String,
     required: true,
-    enum: ['orders'],
+    enum: ['orders', 'receivings', 'items'],
     index: true
   },
   documentId: {

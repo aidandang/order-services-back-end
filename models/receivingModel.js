@@ -1,6 +1,20 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
+const itemSchema = new Schema({
+  qty: {
+    type: Number,
+    required: true
+  },
+  desc: {
+    type: String,
+    required: true
+  },
+  itemRef: {
+    type: String
+  }
+})
+
 const receivingSchema = new Schema({
   tracking: {
     type: String,
@@ -16,12 +30,16 @@ const receivingSchema = new Schema({
     required: true,
     default: "5f9afc8fac9c490cd193b3ee"
   },
+  chkdDate: {
+    type: Date
+  },
+  items: [itemSchema],
   procDate: {
     type: Date
   },
   status: {
     type: String,
-    enum: ['received', 'processed'],
+    enum: ['received', 'checked', 'processed'],
     default: 'received'
   },
   orderRef: {
