@@ -48,3 +48,46 @@ exports.readInventory = catchAsync(async (req, res, next) => {
     trackings: receivingResult
   });
 });
+
+exports.updateReceivedTracking = catchAsync(async (req, res, next) => {
+  const { receiving, items } = req.body
+
+  // update multiple docs in "items" collection 
+  // using mongoDB -> BuldWrite method
+
+  // initiate values
+  const query = []
+  var i = 0
+
+  // add update operations to the query
+  for (i = 0; i < items.length; i++) {
+    query.push({
+      updateOne: {
+        "filter": { _id: items[i]._id },
+        "update": items[i]
+      }
+    })
+  }
+
+  // update items
+  await Item.bulkWrite(query)
+
+  // update the received tracking with request Id
+  // add procDate, update status and receivedNumber
+  
+  // get the request Id
+  const id = req.params.id
+
+  // update the tracking
+  await Receiving.findByIdAndUpdate(
+    id,
+    receiving,
+    { runValidators: true}
+  )
+
+  res
+    .status(200)
+    .json({
+      status: 'success'
+    })
+})
