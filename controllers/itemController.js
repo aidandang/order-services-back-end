@@ -2,6 +2,7 @@ const Item = require('../models/itemModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const { itemAggregate } = require('../utils/aggregation')
+const Revision = require('../models/revisionModel')
 
 exports.readItems = catchAsync(async (req, res, next) => {
   const queryObj = { ...req.query }
@@ -17,8 +18,7 @@ exports.readItems = catchAsync(async (req, res, next) => {
     match.orderNumber = {
       $in: orderNumber
     }
-  }
-  if (queryObj.itemStatus) { 
+  } else if (queryObj.itemStatus) { 
     itemStatus = queryObj.itemStatus.split(',')
     match.status = {
       $in: itemStatus
@@ -29,13 +29,29 @@ exports.readItems = catchAsync(async (req, res, next) => {
 
   // find items and response to the request if success,
   // items retured would be an empty array if not found
-  let query = Item.aggregate([{ $match: match }])
+  let query = Item.aggregate([
+    { 
+      $match: match 
+    },
+    {
+      $group: {
+        _id: '$orderNumber',
+        items: {
+          $push: "$$ROOT"
+        }
+      }
+    }
+  ])
 
-  if (queryObj.sort) {
-    query = query.sort(queryObj.sort.split(',').join(' '))
-  } else {
-    query = query.sort('-createdAt')
-  }
+  // if (queryObj.sort) {
+  //   query = query.sort(queryObj.sort.split(',').join(' '))
+  // } else {
+  //   query = query.sort('-createdAt')
+  // }
+  
+  // query = query.group({
+  //   'orderNumber': '$orderNumber'
+  // })
 
   const items = await query
 
@@ -82,33 +98,32 @@ exports.updateItem = catchAsync(async (req, res, next) => {
   // as a new revision
 
   // check if item found, return error if not
-  const found = Item.find({ _id: id })
+  const found = await Item.findOne({ _id: id })
 
   if (!found) return next(new AppError('No item found.', 404))
 
-  // copy 'rev' (revision) element from found item
-  // and create a new revision to this existing item
-  // with the key name is a time stamp 
-  const rev = { ...found.rev }
-  const existingItem = { ...found }
-  delete existingItem.rev;
+  // create a new revision to this existing item
+  const itemRev = {
+    collectionName: 'items',
+    documentId: found._id,
+    revision: {
+      item: { ...found }
+    }
+  }
 
-  rev[Date.now()] = { ...existingItem }
+  await Revision.create(itemRev)
 
-  // added the new rev to req body then update,
-  // return a success response with updated item
-  obj.rev = rev
-
+  // update item
   const updated = await Item.findByIdAndUpdate(
     id, 
     obj, 
     { new: true, runValidators: true }
-  );
+  )
   
   res
     .status(200)
     .json({
       status: 'success',
       byId: updated
-    });
-});
+    })
+})
