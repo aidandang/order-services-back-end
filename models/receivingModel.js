@@ -12,6 +12,9 @@ const itemSchema = new Schema({
   },
   itemRef: {
     type: String
+  },
+  orderRef: {
+    type: String
   }
 })
 
@@ -41,9 +44,6 @@ const receivingSchema = new Schema({
     type: String,
     enum: ['received', 'checked', 'processed'],
     default: 'received'
-  },
-  orderRef: {
-    type: Array
   },
   createdAt: {
     type: Date,

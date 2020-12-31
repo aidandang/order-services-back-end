@@ -56,8 +56,10 @@ const itemSchema = new Schema({
     default: 24000
   },
   receivingNumber: {
-    type: String,
-    default: ''
+    type: String
+  },
+  recvDate: {
+    type: Date
   },
   shippingNumber: {
     type: String,
