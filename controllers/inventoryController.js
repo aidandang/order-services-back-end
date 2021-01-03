@@ -11,13 +11,16 @@ exports.readInventory = catchAsync(async (req, res, next) => {
     { 
       $match: {
         status: {
-          $in: ['ordered']
+          $in: ['ordered', 'received', 'packed']
         }
       }
     },
     {
       $group: {
         _id: '$orderNumber',
+        itemStatus: {
+          $push: "$status"
+        },
         items: {
           $push: "$$ROOT"
         }
