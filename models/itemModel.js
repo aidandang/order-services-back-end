@@ -40,14 +40,16 @@ const itemSchema = new Schema({
     type: Number,
     default: 0
   },
-  shippingDong: {
+  unitDong: {
     type: Number,
-    required: true,
     default: 0
   },
-  totalDong: {
+  unitShippingDong: {
     type: Number,
-    required: true,
+    default: 0
+  },
+  shippingDong: {
+    type: Number,
     default: 0
   },
   exRate: {
@@ -69,7 +71,7 @@ const itemSchema = new Schema({
     type: String,
     required: true,
     default: 'editing',
-    enum: ['editing', 'ordered', 'received', 'shipped', 'delivered'],
+    enum: ['editing', 'ordered', 'received', 'packed', 'shipped', 'delivered'],
     index: true
   },
   attachments: {
