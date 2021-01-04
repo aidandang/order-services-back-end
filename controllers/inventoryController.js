@@ -1,38 +1,67 @@
+const mongoose = require('mongoose')
+const ObjectId = mongoose.Types.ObjectId
 const Item = require('../models/itemModel')
 const Receiving = require('../models/receivingModel');
 const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
+
+// constants
+const WAREHOUSE_NUMBER = 1
 
 exports.readInventory = catchAsync(async (req, res, next) => {
   // find items and response to the request if success,
   // items retured would be an empty array if not found
-  // group founds by order number
-  let itemQuery = Item.aggregate([
+
+  // set the query
+  const itemAggregate = [
     { 
       $match: {
+        warehouseNumber: {
+          $eq: WAREHOUSE_NUMBER 
+        },
         status: {
           $in: ['ordered', 'received', 'packed']
         }
       }
     },
     {
-      $group: {
-        _id: '$orderNumber',
-        itemStatus: {
-          $push: "$status"
-        },
-        items: {
-          $push: "$$ROOT"
-        }
-      }
+      $lookup: {
+        from: 'warehouses',
+        localField: 'warehouseNumber',
+        foreignField: 'warehouseNumber',
+        as: 'warehouse'
+      }      
+    },
+    {
+      $unwind: '$warehouse'
+    },
+    {
+      $lookup: {
+        from: 'products',
+        localField: 'productNumber',
+        foreignField: 'productNumber',
+        as: 'product'
+      }      
+    },
+    {
+      $unwind: '$product'
     }
-  ])
+  ]
+
+  // get itemss and sort by the orderNumber
+  let itemQuery = Item.aggregate(itemAggregate)
+  itemQuery = itemQuery.sort('-orderNumber')
 
   const itemResult = await itemQuery
+
+  // find receiving trackings and response to the request if success,
+  // items retured would be an empty array if not found
   
   // set query to get all received trackings
   const receivingAggregate = [{ 
     $match: {
+      warehouseNumber: {
+        $eq: WAREHOUSE_NUMBER 
+      },
       status: {
         $in: ['received', 'checked']
       } 
@@ -40,14 +69,14 @@ exports.readInventory = catchAsync(async (req, res, next) => {
   }]
 
   // get trackings and sort by the created date
-  let receivingQuery = Receiving.aggregate(receivingAggregate);
-  recevingQuery = receivingQuery.sort('createdAt');
+  let receivingQuery = Receiving.aggregate(receivingAggregate)
+  recevingQuery = receivingQuery.sort('-createdAt')
 
   const receivingResult = await receivingQuery;
 
   res.status(200).json({
     status: 'success',
-    orders: itemResult,
+    items: itemResult,
     trackings: receivingResult
   });
 });
@@ -76,7 +105,7 @@ exports.updateReceivedTracking = catchAsync(async (req, res, next) => {
   await Item.bulkWrite(query)
 
   // update the received tracking with request Id
-  // add procDate, update status and receivedNumber
+  // add processed date, update status and received number
   
   // get the request Id
   const id = req.params.id

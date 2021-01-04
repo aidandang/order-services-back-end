@@ -1,7 +1,7 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema;
 
-const itemSchema = new Schema({
+const recvItemSchema = new Schema({
   qty: {
     type: Number,
     required: true
@@ -10,11 +10,11 @@ const itemSchema = new Schema({
     type: String,
     required: true
   },
-  itemRef: {
-    type: String
+  itemNumber: {
+    type: Number
   },
-  orderRef: {
-    type: String
+  orderNumber: {
+    type: Number
   }
 })
 
@@ -36,7 +36,7 @@ const receivingSchema = new Schema({
   chkdDate: {
     type: Date
   },
-  items: [itemSchema],
+  recvItems: [recvItemSchema],
   procDate: {
     type: Date
   },
