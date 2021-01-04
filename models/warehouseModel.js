@@ -1,5 +1,8 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  autoIncrement = require('mongoose-auto-increment')
+
+autoIncrement.initialize(mongoose)
 
 const warehouseSchema = new Schema({
   name: {
@@ -15,7 +18,14 @@ const warehouseSchema = new Schema({
     type: Date,
     default: Date.now
   }
-});
+})
+
+warehouseSchema.plugin(autoIncrement.plugin, {
+  model: 'Warehouse',
+  field: 'warehouseNumber',
+  startAt: 1,
+  incrementBy: 1
+})
 
 const Warehouse = mongoose.model('Warehouse', warehouseSchema);
 
