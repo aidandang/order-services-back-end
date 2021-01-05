@@ -10,13 +10,13 @@ const itemSchema = new Schema({
     required: true,
     index: true
   },
-  productId: {
-    type: String,
+  warehouseNumber: {
+    type: Number,
     required: true,
     index: true
   },
-  warehouseId: {
-    type: String,
+  productNumber: {
+    type: Number,
     required: true,
     index: true
   },

@@ -6,28 +6,7 @@ const Revision = require('../models/revisionModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
 const { orderAggregate } = require('../utils/aggregation')
-
-// set order aggregate query to request an order by Id
-const getByIdAggr = (id) => ([
-  { 
-    $match: {
-      _id: ObjectId(id)
-    } 
-  },
-  {
-    $lookup: {
-      from: 'items',
-      localField: 'orderNumber',
-      foreignField: 'orderNumber',
-      as: 'items'
-    }      
-  },
-  { 
-    $sort: {
-      'item.createdAt': -1
-    }
-  }
-])
+const { getByIdAggr } = require('../aggregations/orderAggregation')
 
 exports.readOrders = catchAsync(async (req, res, next) => {
   const queryObj = { ...req.query }
