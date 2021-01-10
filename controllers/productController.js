@@ -93,3 +93,45 @@ exports.readProductById = catchAsync(async (req, res, next) => {
     byId: product
   })
 })
+
+exports.updateProductById = catchAsync(async (req, res, next) => {
+  const { id } = req.params
+  const reqBody = { ...req.body }
+
+  const updateProduct = await Product.findByIdAndUpdate(
+    id, 
+    reqBody, 
+    { new: true, runValidators: true }
+  )
+
+  if (!updateProduct) {
+    return next(new AppError('No product found with that Id', 404))
+  }
+
+  res
+    .status(200)
+    .json({
+      status: 'success',
+      byId: updateProduct
+    })
+})
+
+exports.deleteProductById = catchAsync(async (req, res, next) => {
+  const { id } = req.params
+
+  // delete
+  const result = await Product.findByIdAndDelete(
+    id
+  )
+
+  if (!result) {
+    return next(new AppError('No product found with that Id', 404))
+  }
+
+  res
+    .status(200)
+    .json({
+      status: 'success',
+      product: result
+    })
+})
