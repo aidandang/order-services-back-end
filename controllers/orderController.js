@@ -128,16 +128,15 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
   const existingItems = await Item.find({ orderNumber: found.orderNumber })
 
   // create a new revision to this existing order
-  const orderRev = {
-    collectionName: 'orders',
-    documentId: found._id,
-    revision: {
-      order: { ...found },
-      items: [ ...existingItems ]
-    }
-  }
-
-  await Revision.create(orderRev)
+  // const orderRev = {
+  //   collectionName: 'orders',
+  //   documentId: found._id,
+  //   revision: {
+  //     order: { ...found },
+  //     items: [ ...existingItems ]
+  //   }
+  // }
+  // await Revision.create(orderRev)
 
   // update order
   const updated = await Order.findByIdAndUpdate(

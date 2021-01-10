@@ -1,21 +1,8 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema,
-  autoIncrement = require('mongoose-auto-increment')
-
-autoIncrement.initialize(mongoose)
+  Schema = mongoose.Schema
 
 const itemSchema = new Schema({
   orderNumber: {
-    type: Number,
-    required: true,
-    index: true
-  },
-  warehouseNumber: {
-    type: Number,
-    required: true,
-    index: true
-  },
-  productNumber: {
     type: Number,
     required: true,
     index: true
@@ -27,6 +14,9 @@ const itemSchema = new Schema({
   color: {
     type: Object,
     required: true
+  },
+  warehouse: {
+    type: Object
   },
   size: {
     type: String,
@@ -83,8 +73,8 @@ const itemSchema = new Schema({
   status: {
     type: String,
     required: true,
-    default: 'editing',
-    enum: ['editing', 'ordered', 'received', 'packed', 'shipped', 'delivered'],
+    default: 'ordered',
+    enum: ['ordered', 'ordered', 'received', 'packed', 'shipped', 'delivered'],
     index: true
   },
   attachments: {
@@ -95,13 +85,6 @@ const itemSchema = new Schema({
     default: ''
   }
 })
-
-itemSchema.plugin(autoIncrement.plugin, {
-  model: 'Item',
-  field: 'itemNumber',
-  startAt: 8,
-  incrementBy: 1
-});
 
 const Item = mongoose.model('Item', itemSchema)
 
