@@ -103,15 +103,14 @@ exports.updateItem = catchAsync(async (req, res, next) => {
   if (!found) return next(new AppError('No item found.', 404))
 
   // create a new revision to this existing item
-  const itemRev = {
-    collectionName: 'items',
-    documentId: found._id,
-    revision: {
-      item: { ...found }
-    }
-  }
-
-  await Revision.create(itemRev)
+  // const itemRev = {
+  //   collectionName: 'items',
+  //   documentId: found._id,
+  //   revision: {
+  //     item: { ...found }
+  //   }
+  // }
+  // await Revision.create(itemRev)
 
   // update item
   const updated = await Item.findByIdAndUpdate(

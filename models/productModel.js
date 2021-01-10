@@ -1,8 +1,5 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema,
-  autoIncrement = require('mongoose-auto-increment')
-
-autoIncrement.initialize(mongoose)
+  Schema = mongoose.Schema
 
 const colorSchema = new Schema({
   color: {
@@ -33,7 +30,8 @@ const productSchema = new Schema({
   },
   styleCode: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
   sku: {
     type: String,
@@ -59,13 +57,6 @@ const productSchema = new Schema({
     type: Date,
     default: Date.now
   }
-})
-
-productSchema.plugin(autoIncrement.plugin, {
-  model: 'Product',
-  field: 'productNumber',
-  startAt: 7,
-  incrementBy: 1
 })
 
 const Product = mongoose.model('Product', productSchema)

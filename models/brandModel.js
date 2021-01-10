@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema
 
 const brandSchema = new Schema({
   name: {
@@ -16,8 +16,8 @@ const brandSchema = new Schema({
     type: Date,
     default: Date.now
   }
-});
+})
 
-const Brand = mongoose.model('Brand', brandSchema);
+const Brand = mongoose.model('Brand', brandSchema)
 
-module.exports = Brand;
+module.exports = Brand

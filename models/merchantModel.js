@@ -1,5 +1,5 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema
 
 const merchantSchema = new Schema({
   name: {
@@ -17,6 +17,6 @@ const merchantSchema = new Schema({
   }
 });
 
-const Merchant = mongoose.model('Merchant', merchantSchema);
+const Merchant = mongoose.model('Merchant', merchantSchema)
 
-module.exports = Merchant;
+module.exports = Merchant

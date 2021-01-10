@@ -26,13 +26,6 @@ const purchasingSchema = new Schema({
     type: String,
     required: true,
     enum: ['online', 'walk-in', 'shipping']
-  }
-})
-
-const costingSchema = new Schema({
-  salesTax: {
-    type: Number,
-    default: 0
   },
   otherCost: {
     type: Number,
@@ -40,12 +33,6 @@ const costingSchema = new Schema({
   },
   totalCost: {
     type: Number,
-    required: true,
-    default: 0
-  },
-  paidAmount: {
-    type: Number,
-    required: true,
     default: 0
   }
 })
@@ -58,10 +45,6 @@ const sellingSchema = new Schema({
   shippingPrice: {
     type: Number,
     required: true,
-    default: 0
-  },
-  salesTax: {
-    type: Number,
     default: 0
   },
   discount: {
@@ -93,10 +76,6 @@ const orderSchema = new Schema({
   },
   purchasing: {
     type: purchasingSchema
-  },
-  costing: {
-    type: costingSchema,
-    required: true
   },
   selling: {
     type: sellingSchema

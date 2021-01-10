@@ -1,72 +1,75 @@
-const Brand = require('../models/brandModel');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-
-exports.readBrands = catchAsync(async (req, res, next) => {
-  let query = Brand.find();
-
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(',').join(' ');
-    query = query.sort(sortBy);
-  } else {
-    query = query.sort('name');
-  }
-
-  const brands = await query;
-
-  res.status(200).json({
-    status: 'success',
-    allIds: brands
-  });
-});
+const Brand = require('../models/brandModel')
+const catchAsync = require('../utils/catchAsync')
 
 exports.createBrand = catchAsync(async (req, res, next) => {
-  const newBrand = await Brand.create(req.body);
+  const newBrand = await Brand.create(req.body)
 
-  let brands = null;
-
+  // response all brands and byId is the brand just created
+  var brands = null
   if (newBrand) {
-    brands = await Brand.find().sort('name');
+    brands = await Brand.find().sort('name')
   }
 
   res.status(201).json({
     status: 'success',
-    byId: newBrand,
+    allIds: brands,
+    byId: newBrand
+  })
+})
+
+exports.readBrands = catchAsync(async (req, res, next) => {
+  var query = Brand.find()
+
+  // sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ')
+    query = query.sort(sortBy)
+  } else {
+    query = query.sort('name')
+  }
+
+  const brands = await query
+
+  res.status(200).json({
+    status: 'success',
     allIds: brands
-  });
-});
+  })
+})
 
 exports.updateBrand = catchAsync(async (req, res, next) => {
-  const brand = await Brand.findByIdAndUpdate(
-    req.params.id,
-    req.body,
+  const { id } = req.params
+  const reqBody = { ...req.body }
+
+  const result = await Brand.findByIdAndUpdate(
+    id,
+    reqBody,
     { new: true, runValidators: true }
-  );
+  )
 
-  let brands = null;
-
-  if (brand) {
-    brands = await Brand.find().sort('name');
+  // response all brands and byId is the brand just updated
+  var brands = null
+  if (result) {
+    brands = await Brand.find().sort('name')
   }
 
   res
     .status(200)
     .json({
       status: 'PATCH_SUCCESS',
-      byId: brand,
-      allIds: brands
-    });
+      allIds: brands,
+      byId: result
+    })
 })
 
 exports.deleteBrand = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
+  const { id } = req.params
   
-  const brand = await Brand.findByIdAndDelete(id);
+  const result = await Brand.findByIdAndDelete(id)
 
-  let brands = null;
-
-  if (brand) {
-    brands = await Brand.find().sort('name');
+  // response all brands left after deleting
+  var brands = null
+  if (result) {
+    brands = await Brand.find().sort('name')
   }
 
   res
@@ -74,5 +77,5 @@ exports.deleteBrand = catchAsync(async (req, res, next) => {
     .json({
       status: 'DELETE_SUCCESS',
       allIds: brands
-    });
-});
+    })
+})
