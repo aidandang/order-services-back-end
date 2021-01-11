@@ -1,5 +1,3 @@
-const mongoose = require('mongoose')
-const ObjectId = mongoose.Types.ObjectId
 const Product = require('../models/productModel')
 const catchAsync = require('../utils/catchAsync')
 const { getProducts } = require('../aggregations/productAggregation')
@@ -84,12 +82,40 @@ exports.readProducts = catchAsync(async (req, res, next) => {
 })
 
 exports.readProductById = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const match = { _id: ObjectId(id) }
-  const product = await Product.findOne(match)
+  const { id } = req.params
+  
+  const product = await Product.findById(id)
   
   res.status(200).json({
     status: 'success',
     byId: product
+  })
+})
+
+exports.updateProductById = catchAsync(async (req, res, next) => {
+  const { id } = req.params
+  const reqBody = { ...req.body }
+
+  const updateProduct = await Product.findByIdAndUpdate(
+    id, 
+    reqBody, 
+    { new: true, runValidators: true }
+  )
+
+  res.status(200).json({
+    status: 'success',
+    byId: updateProduct
+  })
+})
+
+exports.deleteProductById = catchAsync(async (req, res, next) => {
+  const { id } = req.params
+
+  // delete
+  const result = await Product.findByIdAndDelete(id)
+
+  res.status(200).json({
+    status: 'success',
+    product: result
   })
 })

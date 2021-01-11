@@ -1,226 +1,154 @@
-const mongoose = require('mongoose')
-const ObjectId = mongoose.Types.ObjectId
-const Product = require('../models/productModel')
-const catchAsync = require('../utils/catchAsync')
-const AppError = require('../utils/appError')
-const { productAggregate } = require('../utils/aggregation')
-const { getProducts } = require('../aggregations/productAggregation')
+const Customer = require('../models/customerModel');
+const APIFeatures = require('../utils/apiFeatures');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/appError');
 
-exports.createProduct = catchAsync(async (req, res, next) => {
-  const reqBody = { ...req.body }
+exports.readCustomers = catchAsync(async (req, res, next) => {
 
-  // create
-  const newProduct = await Product.create(reqBody)
+  // set default limit documents per page
+  const defaultLimit = 10;
+  const defaultPage = 1;
 
-  // response
-  res.status(201).json({
-    status: 'success',
-    byId: newProduct
-  })
-})
+  // request the query after filtering to count a number of documents
+  const features = new APIFeatures(
+    Customer.find(), 
+    req.query, 
+    defaultLimit, 
+    defaultPage)
+    .filter();
+  const arr = await features.query;
+  const count = arr.length;
+  
+  // request the query after sorting, limiting and paginating
+  features.sort().limitFields().paginate();
+  const customers = await features.query;
 
-exports.readProducts = catchAsync(async (req, res, next) => {
-  const { name, styleCode } = req.query
+  // get pages and num of docs
+  const limit = features.limit;
+  const pages = Math.ceil(count/limit);
 
-  var match = null
+  if (customers.length === 0) return next(new AppError('No customer found.', 404))
 
-  if (name) {
-    match = {
-      '$expr': {
-          $regexMatch: {
-          input: "$name",
-          regex: name,
-          options: "i"
-        }
-      } 
-    }  
-  } else if (styleCode) {
-    match = {
-      '$expr': {
-          $regexMatch: {
-          input: "$styleCode",
-          regex: styleCode,
-          options: "i"
-        }
-      } 
-    }  
-  }
+  res
+    .status(200)
+    .json({
+      status: 'success',
+      info: {
+        count: count,
+        pages: pages
+      },
+      allIds: customers
+    });
+});
 
-  if (match === null) {
-    match = {}
-  }
+exports.readCustomerById = catchAsync(async (req, res, next) => {
+  const customer = await Customer.findById(req.params.id);
 
-  // set query
-  var query = Product.aggregate(getProducts(match))
-
-  // sort
-  if (req.query.sort) {
-    const sortBy = req.query.sort.split(',').join(' ')
-    query = query.sort(sortBy)
-  } else {
-    query = query.sort('-createdAt')
-  }
-
-  // pagination
-  const page = req.query.page * 1 || 1
-  const limit = req.query.limit * 1 || 5
-  const skip = (page - 1) * limit
-
-  const arr = await query
-  const count = arr.length
-  const pages = Math.ceil(count/limit)
-
-  query = query.skip(skip).limit(limit)
-
-  // get products
-  const products = await
-
-  res.status(200).json({
-    status: 'success',
-    info: {
-      count,
-      pages
-    },
-    allIds: products
-  })
-})
-
-exports.readProductById = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const match = { _id: ObjectId(id) }
-  const product = await Product.aggregate(productAggregate(match))
-
-  if (product.length === 0) {
-    return next(new AppError('No product found with that Id', 404))
+  if (!customer) {
+    return next(new AppError('No customer found with that Id', 404))
   }
   
-  res.status(200).json({
-    status: 'success',
-    byId: product[0]
-  })
-})
-
-exports.updateProductById = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const queryObj = {...req.body}
-
-  const updateProduct = await Product.findByIdAndUpdate(
-    id, 
-    queryObj, 
-    { new: true, runValidators: true }
-  )
-
-  if (!updateProduct) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  const match = { _id: ObjectId(id) }
-  const product = await Product.aggregate(productAggregate(match))
-
   res
     .status(200)
     .json({
-      status: 'PATCH_SUCCESS',
-      byId: product[0]
-    })
-})
+      status: 'success',
+      byId: customer
+    });
+});
 
-exports.deleteProductById = catchAsync(async (req, res, next) => {
-  const result = await Product.findByIdAndDelete(
-    req.params.id
-  )
-
-  if (!result) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  res
-    .status(200)
-    .json({
-      status: 'DELETE_SUCCESS',
-      product: result
-    })
-})
-
-exports.addColor = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const queryObj = req.body
-  const result = await Product.findByIdAndUpdate(
-    id, 
-    { $push: 
-      { "colors": queryObj } 
-    }, 
-    { new: true, runValidators: true }
-  )
-
-  if (!result) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  const match = { _id: ObjectId(id) }
-  const product = await Product.aggregate(productAggregate(match))
-
+exports.createCustomer = catchAsync(async (req, res, next) => {
+  const newCustomer = await Customer.create(req.body);
   res
     .status(201)
     .json({
-      status: 'POST_SUCCESS',
-      product: product[0]
-    })
-})
+      status: 'success',
+      byId: newCustomer
+    });
+});
 
-exports.updateColor = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const sid = req.params.sid
-  // Get an array of object keys needed to update from req.body.
-  const keys = Object.keys(req.body)
-  // Assign back value for each key with mongoose syntax: { "items.$.key1" : req.body.key1, "items.$.key2": req.body.key2, ... }
-  const updateValues = keys.reduce((acc, curr) => Object.assign(acc, { [`colors.$.${curr}`]: req.body[curr] }), {})
-  const result = await Product.findOneAndUpdate(
-    { _id: id, "colors._id": sid },
-    { $set: updateValues },
-    { new: true, safe: true, runValidators: true }
-  )
-
-  if (!result) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  const match = { _id: ObjectId(id) }
-  const product = await Product.aggregate(productAggregate(match))
-
+exports.addShippingInfo = catchAsync(async (req, res, next) => {
+  const result = await Customer.findByIdAndUpdate(
+    req.params.id, 
+    { $push: 
+      { "shippingInfo": req.body } 
+    }, 
+    { new: true, runValidators: true }
+  );
   res
-    .status(200)
+    .status(201)
     .json({
-      status: 'PATCH_SUCCESS',
-      product: product[0]
-    })
-})
+      status: 'success',
+      byId: result
+    });
+});
 
-exports.deleteColor = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const sid = req.params.sid
-
-  const result = await Product.findByIdAndUpdate(
+exports.deleteShippingInfo = catchAsync(async (req, res, next) => {
+  const id = req.params.id;
+  const sid = req.params.sid;
+  
+  const result = await Customer.findByIdAndUpdate(
     id, 
     { 
       $pull: { 
-        "colors": { "_id": sid }
+        "shippingInfo": { "_id": sid } 
       } 
     },
     { new: true, safe: true }
-  )
-
-  const match = { _id: ObjectId(id) }
-  const product = await Product.aggregate(productAggregate(match))
+  );
 
   if (!result) {
-    return next(new AppError('No product found with that Id', 404))
+    return next(new AppError('No customer found with that Id', 404))
   }
 
   res
     .status(200)
     .json({
       status: 'DELETE_SUCCESS',
-      product: product[0]
-    })
-})
+      byId: result
+    });
+});
+
+exports.updateShippingInfo = catchAsync(async (req, res, next) => {
+  // Get an array of object keys needed to update from req.body.
+  const keys = Object.keys(req.body);
+  // Assign back value for each key with mongoose syntax: { "items.$.key1" : req.body.key1, "items.$.key2": req.body.key2, ... }
+  const updateValues = keys.reduce((acc, curr) => Object.assign(acc, { [`shippingInfo.$.${curr}`]: req.body[curr] }), {});
+  const result = await Customer.findOneAndUpdate(
+    { _id: req.params.id, "shippingInfo._id": req.params.sid },
+    { $set: updateValues },
+    { new: true, safe: true, runValidators: true }
+  );
+  res
+    .status(201)
+    .json({
+      status: 'success',
+      byId: result
+    });
+});
+
+exports.updateCustomer = catchAsync(async (req, res, next) => {
+  const customer = await Customer.findByIdAndUpdate(
+    req.params.id, 
+    req.body, 
+    { new: true, runValidators: true }
+  );
+  res
+    .status(200)
+    .json({
+      status: 'success',
+      byId: customer
+    });
+});
+
+exports.deleteCustomer = catchAsync(async (req, res, next) => {
+  const result = await Customer.findByIdAndDelete(
+    req.params.id,
+    { new: true, safe: true }
+  );
+  res
+    .status(204)
+    .json({
+      status: 'success',
+      byId: result
+    });
+});

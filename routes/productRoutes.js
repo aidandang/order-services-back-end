@@ -11,16 +11,7 @@ router
 router
   .route('/:id')
   .get(productController.readProductById)
-//   .patch(productController.updateProductById)
-//   .delete(productController.deleteProductById)
-
-// router
-//   .route('/:id/colors/')
-//   .post(productController.addColor)
-
-// router
-//   .route('/:id/colors/:sid')
-//   .patch(productController.updateColor)
-//   .delete(productController.deleteColor)
+  .patch(productController.updateProductById)
+  .delete(productController.deleteProductById)
   
 module.exports = router
