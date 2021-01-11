@@ -1,17 +1,13 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema,
-  autoIncrement = require('mongoose-auto-increment');
+  autoIncrement = require('mongoose-auto-increment')
 
-autoIncrement.initialize(mongoose);
+autoIncrement.initialize(mongoose)
 
 const shippingInfoSchema = new Schema({
   fullname: {
     type: String,
     required: true
-  },
-  othername: {
-    type: String,
-    required: false
   },
   country: {
     type: String,
@@ -40,23 +36,13 @@ const shippingInfoSchema = new Schema({
   phone: {
     type: String,
     required: true
+  },
+  note: {
+    type: String
   }
-});
-
-const revSchema = new Schema({
-  modifiedAt: {
-    type: Date,
-    require: true,
-    default: Date.now
-  }
-});
+})
 
 const customerSchema = new Schema({
-  email: {
-    type: String,
-    required: false,
-    unique: false
-  },
   nickname: {
     type: String,
     required: true,
@@ -66,10 +52,8 @@ const customerSchema = new Schema({
     type: String,
     required: true,
     index: true
-  },
-  othername: {
-    type: String,
-    required: false
+  },email: {
+    type: String
   },
   country: {
     type: String,
@@ -81,8 +65,7 @@ const customerSchema = new Schema({
     index: true
   },
   streetAddress2: {
-    type: String,
-    required: false
+    type: String
   },
   city: {
     type: String,
@@ -109,26 +92,22 @@ const customerSchema = new Schema({
     type: String,
     default: ''
   },
-  active: {
-    type: Boolean,
-    default: false
-  },
-  rev: {
-    type: [revSchema]
+  note: {
+    type: String
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
-});
+})
 
 customerSchema.plugin(autoIncrement.plugin, {
   model: 'Customer',
-  field: 'account',
-  startAt: 110001,
+  field: 'customerNumber',
+  startAt: 110000,
   incrementBy: 1
-});
+})
 
-const Customer = mongoose.model('Customer', customerSchema);
+const Customer = mongoose.model('Customer', customerSchema)
 
-module.exports = Customer;
+module.exports = Customer

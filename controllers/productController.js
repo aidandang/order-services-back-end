@@ -1,5 +1,3 @@
-const mongoose = require('mongoose')
-const ObjectId = mongoose.Types.ObjectId
 const Product = require('../models/productModel')
 const catchAsync = require('../utils/catchAsync')
 const { getProducts } = require('../aggregations/productAggregation')
@@ -84,9 +82,9 @@ exports.readProducts = catchAsync(async (req, res, next) => {
 })
 
 exports.readProductById = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  const match = { _id: ObjectId(id) }
-  const product = await Product.findOne(match)
+  const { id } = req.params
+  
+  const product = await Product.findById(id)
   
   res.status(200).json({
     status: 'success',
@@ -104,34 +102,20 @@ exports.updateProductById = catchAsync(async (req, res, next) => {
     { new: true, runValidators: true }
   )
 
-  if (!updateProduct) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      byId: updateProduct
-    })
+  res.status(200).json({
+    status: 'success',
+    byId: updateProduct
+  })
 })
 
 exports.deleteProductById = catchAsync(async (req, res, next) => {
   const { id } = req.params
 
   // delete
-  const result = await Product.findByIdAndDelete(
-    id
-  )
+  const result = await Product.findByIdAndDelete(id)
 
-  if (!result) {
-    return next(new AppError('No product found with that Id', 404))
-  }
-
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      product: result
-    })
+  res.status(200).json({
+    status: 'success',
+    product: result
+  })
 })
