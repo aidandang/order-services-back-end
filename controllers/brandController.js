@@ -4,7 +4,7 @@ const catchAsync = require('../utils/catchAsync')
 exports.createBrand = catchAsync(async (req, res, next) => {
   const newBrand = await Brand.create(req.body)
 
-  // response all brands and byId is the brand just created
+  // response all ids and byId is the brand just created
   var brands = null
   if (newBrand) {
     brands = await Brand.find().sort('name')
@@ -46,19 +46,17 @@ exports.updateBrand = catchAsync(async (req, res, next) => {
     { new: true, runValidators: true }
   )
 
-  // response all brands and byId is the brand just updated
+  // response all brands and byId the brand just updated
   var brands = null
   if (result) {
     brands = await Brand.find().sort('name')
   }
 
-  res
-    .status(200)
-    .json({
-      status: 'PATCH_SUCCESS',
-      allIds: brands,
-      byId: result
-    })
+  res.status(200).json({
+    status: 'success',
+    allIds: brands,
+    byId: result
+  })
 })
 
 exports.deleteBrand = catchAsync(async (req, res, next) => {
@@ -72,10 +70,8 @@ exports.deleteBrand = catchAsync(async (req, res, next) => {
     brands = await Brand.find().sort('name')
   }
 
-  res
-    .status(200)
-    .json({
-      status: 'DELETE_SUCCESS',
-      allIds: brands
-    })
+  res.status(200).json({
+    status: 'success',
+    allIds: brands
+  })
 })

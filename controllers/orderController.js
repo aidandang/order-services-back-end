@@ -1,67 +1,80 @@
-const mongoose = require('mongoose')
-const ObjectId = mongoose.Types.ObjectId
 const Order = require('../models/orderModel')
 const Item = require('../models/itemModel')
-const Revision = require('../models/revisionModel')
 const catchAsync = require('../utils/catchAsync')
 const AppError = require('../utils/appError')
-const { orderAggregate } = require('../utils/aggregation')
-const { getByIdAggr } = require('../aggregations/orderAggregation')
+const { getOrders, getByIdAggr } = require('../aggregations/orderAggregation')
+
+exports.createOrder = catchAsync(async (req, res, next) => {
+  const reqBody = { ...req.body }
+
+  // create
+  const newOrder = await Order.create(reqBody)
+  
+  // response
+  res.status(201).json({
+    status: 'success',
+    byId: newOrder
+  })
+})
 
 exports.readOrders = catchAsync(async (req, res, next) => {
-  const queryObj = { ...req.query }
+  const { orderNumber, orderStatus, purchasingNumber } = req.query 
 
   // read all items that matches with the query
   // return error if there is no valid query.
   var match = {}
-  var orderNumber = null
-  var orderStatus = null
-  var purchasingNumber = null
 
-  if (queryObj.orderNumber) {
-    orderNumber = queryObj.orderNumber.split(',')
-    match.orderNumber = {
-      $in: orderNumber
-    }  
-  } 
-  
-  if (queryObj.orderStatus) {
-    orderStatus = queryObj.orderStatus.split(',')
+  if (orderNumber) {
     match = {
-      status: {
-        $in: orderStatus
-      } 
+      orderNumber: {
+        $in: [Number(orderNumber)]
+      }
     }
-  } 
-
-  if (queryObj.purchasingNumber) {
-    purchasingNumber = queryObj.purchasingNumber
-    match['$expr'] = {
-      $regexMatch: {
-        input: "$purchasingNumber",
-        regex: purchasingNumber,
-        options: "i"
+  } else if (orderStatus) {
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: "$status",
+          regex: orderStatus,
+          options: "i"
+        }
       } 
+    }  
+  } else if (purchasingNumber) {
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: "$purchasing.orderNumber",
+          regex: purchasingNumber,
+          options: "i"
+        } 
+      }
     } 
-  } 
+  }
+
+  if (match === null) {
+    match = {}
+  }
 
   // find orders and response to the request if success,
   // orders retured would be an empty array if there is no found
-  let query = Order.aggregate(orderAggregate(match))
+  var query = Order.aggregate(getOrders(match))
 
-  const arr = await query
-  const count = arr.length
-
-  // sort and paginate found orders
-  if (queryObj.sort) {
-    query = query.sort(query.sort.split(',').join(' '))
+  // sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ')
+    query = query.sort(sortBy)
   } else {
     query = query.sort('-createdAt')
   }
 
-  const page = queryObj.page * 1 || 1
-  const limit = queryObj.limit * 1 || 20
+  // pagination
+  const page = req.query.page * 1 || 1
+  const limit = req.query.limit * 1 || 10
   const skip = (page - 1) * limit
+  
+  const arr = await query
+  const count = arr.length
   const pages = Math.ceil(count/limit)
 
   query = query.skip(skip).limit(limit)
@@ -71,8 +84,8 @@ exports.readOrders = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: 'success',
     info: {
-      count,
-      pages
+      count: count,
+      pages: pages
     },
     allIds: orders
   })
@@ -87,34 +100,19 @@ exports.readOrderById = catchAsync(async (req, res, next) => {
   // otherwise return the order with items sorted by createdAt
   const order = await Order.aggregate(getByIdAggr(id))
 
-  if (order.length === 0) { 
-    return next(new AppError('No order found.', 404)) 
-  } else {
-    res.status(200).json({
-      status: 'success',
-      byId: order[0]
-    })
-  }
-})
-
-exports.createOrder = catchAsync(async (req, res, next) => {
-  const obj = { ...req.body }
-
-  // create new order and return a success response
-  // with that new order
-  const newOrder = await Order.create(obj)
+  if (order.length === 0) return next(new AppError('No order found.', 404)) 
   
-  res.status(201).json({
+  res.status(200).json({
     status: 'success',
-    byId: newOrder
+    byId: order[0]
   })
 })
 
 exports.updateOrderById = catchAsync(async (req, res, next) => {
-  const id = req.params.id
+  const { id } = req.params
+  const { items } = req.body
   const obj = { ...req.body }
   delete obj.items
-  const items = [ ...req.body.items ]
 
   // before updating, the existing order needed to saved
   // as a new revision
@@ -126,17 +124,6 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
 
   // get existing items
   const existingItems = await Item.find({ orderNumber: found.orderNumber })
-
-  // create a new revision to this existing order
-  // const orderRev = {
-  //   collectionName: 'orders',
-  //   documentId: found._id,
-  //   revision: {
-  //     order: { ...found },
-  //     items: [ ...existingItems ]
-  //   }
-  // }
-  // await Revision.create(orderRev)
 
   // update order
   const updated = await Order.findByIdAndUpdate(
@@ -191,7 +178,7 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
 
   await Item.bulkWrite(query)
 
-  // get updated orders
+  // get updated orders and response
   const order = await Order.aggregate(getByIdAggr(id))
 
   res

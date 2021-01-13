@@ -1,8 +1,8 @@
 const mongoose = require('mongoose'),
   Schema = mongoose.Schema,
-  autoIncrement = require('mongoose-auto-increment');
+  autoIncrement = require('mongoose-auto-increment')
 
-autoIncrement.initialize(mongoose);
+autoIncrement.initialize(mongoose)
 
 const purchasingSchema = new Schema({
   merchant: {
@@ -68,9 +68,9 @@ const orderSchema = new Schema({
     type: String,
     required: true,
     enum: [
-      'created',
-      'editing', 
-      'ordered'
+      'created', 
+      'ordered',
+      'cancel'
     ],
     index: true
   },
@@ -80,28 +80,19 @@ const orderSchema = new Schema({
   selling: {
     type: sellingSchema
   },
-  attachments: {
-    type: Array
-  },
-  rev: {
-    type: Object
-  },
   createdAt: {
     type: Date,
     default: Date.now
-  },
-  createdBy: {
-    type: Object
   }
-});
+})
 
 orderSchema.plugin(autoIncrement.plugin, {
   model: 'Order',
   field: 'orderNumber',
   startAt: 1,
   incrementBy: 1
-});
+})
 
-const Order = mongoose.model('Order', orderSchema);
+const Order = mongoose.model('Order', orderSchema)
 
-module.exports = Order;
+module.exports = Order
