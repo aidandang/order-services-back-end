@@ -24,13 +24,13 @@ exports.readCustomers = catchAsync(async (req, res, next) => {
   if (customerNumber) {
     match = {
       customerNumber: {
-        $in: [customerNumber]
+        $in: [Number(customerNumber)]
       }
     }  
   } else if (phone) {
     match = {
       '$expr': {
-          $regexMatch: {
+        $regexMatch: {
           input: "$phone",
           regex: phone,
           options: "i"
@@ -40,7 +40,7 @@ exports.readCustomers = catchAsync(async (req, res, next) => {
   } else if (nickname) {
     match = {
       '$expr': {
-          $regexMatch: {
+        $regexMatch: {
           input: "$nickname",
           regex: nickname,
           options: "i"
@@ -50,7 +50,7 @@ exports.readCustomers = catchAsync(async (req, res, next) => {
   } else if (fullname) {
     match = {
       '$expr': {
-          $regexMatch: {
+        $regexMatch: {
           input: "$fullname",
           regex: fullname,
           options: "i"
@@ -60,7 +60,7 @@ exports.readCustomers = catchAsync(async (req, res, next) => {
   } else if (streetAddress1) {
     match = {
       '$expr': {
-          $regexMatch: {
+        $regexMatch: {
           input: "$streetAddress1",
           regex: streetAddress1,
           options: "i"

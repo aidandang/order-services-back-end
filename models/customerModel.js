@@ -52,7 +52,8 @@ const customerSchema = new Schema({
     type: String,
     required: true,
     index: true
-  },email: {
+  },
+  email: {
     type: String
   },
   country: {
