@@ -7,6 +7,11 @@ const itemSchema = new Schema({
     required: true,
     index: true
   },
+  warehouseNumber: {
+    type: Number,
+    required: true,
+    index: true
+  },
   product: {
     type: Object,
     required: true
@@ -14,9 +19,6 @@ const itemSchema = new Schema({
   color: {
     type: Object,
     required: true
-  },
-  warehouse: {
-    type: Object
   },
   size: {
     type: String,
@@ -74,7 +76,7 @@ const itemSchema = new Schema({
     type: String,
     required: true,
     default: 'ordered',
-    enum: ['ordered', 'ordered', 'received', 'packed', 'shipped', 'delivered'],
+    enum: ['ordered', 'received', 'packed', 'shipped', 'delivered'],
     index: true
   },
   attachments: {
