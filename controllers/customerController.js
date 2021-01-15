@@ -9,11 +9,10 @@ exports.createCustomer = catchAsync(async (req, res, next) => {
   const newCustomer = await Customer.create(reqBody)
 
   // response
-  res
-    .status(201).json({
-      status: 'success',
-      byId: newCustomer
-    })
+  res.status(201).json({
+    status: 'success',
+    byId: newCustomer
+  })
 })
 
 exports.readCustomers = catchAsync(async (req, res, next) => {

@@ -10,5 +10,4 @@ router
   .route('/receiving/:id')
   .patch(inventoryController.updateReceivedTracking)
   
-  
 module.exports = router

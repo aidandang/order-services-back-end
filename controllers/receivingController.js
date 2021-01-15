@@ -1,14 +1,26 @@
-const Receiving = require('../models/receivingModel');
-const catchAsync = require('../utils/catchAsync');
-const AppError = require('../utils/appError');
-const { receivingAggregate } = require('../utils/aggregation');
-const Revision = require('../models/revisionModel')
+const Receiving = require('../models/receivingModel')
+const catchAsync = require('../utils/catchAsync')
+const { getReceivings } = require('../aggregations/receivingAggregation')
+
+exports.createTracking = catchAsync(async (req, res, next) => {
+  const reqBody = [ ...req.body ]
+
+  // create
+  const newtracking = await Receiving.insertMany(reqBody)
+
+  // response
+  res.status(201).json({
+    status: 'success',
+    byId: newtracking
+  })
+})
 
 exports.readTrackings = catchAsync(async (req, res, next) => {
-  let match = null;
+  const { tracking, status, recvDate, procDate } = req.query
+  
+  var match = null
 
-  if (req.query.tracking) {
-    tracking = req.query.tracking;
+  if (tracking) {
     match = {
       '$expr': {
           $regexMatch: {
@@ -17,9 +29,8 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
           options: "i"
         }
       } 
-    };  
-  } else if (req.query.status) {
-    status = req.query.status;
+    }  
+  } else if (status) {
     match = {
       '$expr': {
         $regexMatch: {
@@ -28,9 +39,8 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
           options: "i"
         } 
       } 
-    };  
-  } else if (req.query.recvDate) {
-    recvDate = req.query.recvDate;
+    }  
+  } else if (recvDate) {
     match = {
       '$expr': {
         $regexMatch: {
@@ -40,8 +50,7 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
         }
       }
     }
-  } else if (req.query.procDate) {
-    procDate = req.query.procDate;
+  } else if (procDate) {
     match = {
       '$expr': {
         $regexMatch: {
@@ -57,26 +66,29 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
     match = {}
   }
 
-  let query = Receiving.aggregate(receivingAggregate(match))
+  // set query
+  var query = Receiving.aggregate(getReceivings(match))
 
+  // sort
   if (req.query.sort) {
-    const sortBy = req.query.sort.split(',').join(' ');
-    query = query.sort(sortBy);
+    const sortBy = req.query.sort.split(',').join(' ')
+    query = query.sort(sortBy)
   } else {
-    query = query.sort('-recvDate');
+    query = query.sort('-recvDate')
   }
 
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 6;
-  const skip = (page - 1) * limit;
+  // pagination
+  const page = req.query.page * 1 || 1
+  const limit = req.query.limit * 1 || 10
+  const skip = (page - 1) * limit
 
-  const arr = await query;
-  const count = arr.length;
-  const pages = Math.ceil(count/limit);
+  const arr = await query
+  const count = arr.length
+  const pages = Math.ceil(count/limit)
 
-  query = query.skip(skip).limit(limit);
+  query = query.skip(skip).limit(limit)
 
-  const trackings = await query;
+  const trackings = await query
 
   res.status(200).json({
     status: 'success',
@@ -85,64 +97,22 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
       pages: pages
     },
     allIds: trackings
-  });
-});
-
-exports.createTracking = catchAsync(async (req, res, next) => {
-  const newtracking = await Receiving.insertMany(req.body);
-
-  res.status(201).json({
-    status: 'success',
-    byId: newtracking
-  });
-});
+  })
+})
 
 exports.updateTracking = catchAsync(async (req, res, next) => {
-  const id = req.params.id
-  
-  // before updating, the existing tracking needed to saved
-  // as a new revision
-  
-  // check if order found, return error if not
-  const found = await Receiving.findOne({ _id: id })
-
-  if (!found) return next(new AppError('No receiving found.', 404))
-
-  // create a new revision to this existing tracking
-  const receivingRev = {
-    collectionName: 'receivings',
-    documentId: found._id,
-    revision: {
-      receiving: { ...found }
-    }
-  }
-
-  await Revision.create(receivingRev)
+  const { id } = req.params
+  const reqBody = req.body
 
   // update tracking
   const tracking = await Receiving.findByIdAndUpdate(
     id,
-    req.body,
+    reqBody,
     { new: true, runValidators: true }
-  );
+  )
 
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      byId: tracking
-    });
+  res.status(200).json({
+    status: 'success',
+    byId: tracking
+  })
 })
-
-exports.deleteTracking = catchAsync(async (req, res, next) => {
-  const id = req.params.id;
-  
-  const tracking = await Receiving.findByIdAndDelete(id);
-
-  res
-    .status(200)
-    .json({
-      status: 'success',
-      byId: tracking
-    });
-});

@@ -10,11 +10,8 @@ const recvItemSchema = new Schema({
     type: String,
     required: true
   },
-  itemNumber: {
-    type: Number
-  },
-  orderNumber: {
-    type: Number
+  itemRef: {
+    type: String
   }
 })
 
@@ -28,10 +25,9 @@ const receivingSchema = new Schema({
     type: Date,
     required: true
   },
-  warehouse: {
-    type: String,
-    required: true,
-    default: "5f9afc8fac9c490cd193b3ee"
+  warehouseNumber: {
+    type: Number,
+    required: true
   },
   chkdDate: {
     type: Date
@@ -51,6 +47,6 @@ const receivingSchema = new Schema({
   }
 });
 
-const Receiving = mongoose.model('Receiving', receivingSchema);
+const Receiving = mongoose.model('Receiving', receivingSchema)
 
-module.exports = Receiving;
+module.exports = Receiving
