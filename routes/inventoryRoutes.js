@@ -6,8 +6,13 @@ const authController = require('../controllers/authController')
 router
   .route('/')
   .get(inventoryController.readInventory)
+
 router
-  .route('/receiving/:id')
-  .patch(inventoryController.updateReceivedTracking)
+  .route('/receiving/check/:id')
+  .patch(inventoryController.updateReceivedTrackingCheck)
+
+router
+  .route('/receiving/process/:id')
+  .patch(inventoryController.updateReceivedTrackingProcess)
   
 module.exports = router
