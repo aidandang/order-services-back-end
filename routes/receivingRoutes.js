@@ -11,6 +11,6 @@ router
 router
   .route('/:id')
   .patch(receivingController.updateTracking)
-  .delete(receivingController.deleteTracking);
+//   .delete(receivingController.deleteTracking);
   
 module.exports = router;
