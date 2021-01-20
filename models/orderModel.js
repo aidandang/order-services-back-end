@@ -27,11 +27,19 @@ const purchasingSchema = new Schema({
     required: true,
     enum: ['online', 'walk-in', 'shipping']
   },
+  purSalesTax: {
+    type: Number,
+    default: 0
+  },
+  shippingCost: {
+    type: Number,
+    default: 0
+  },
   otherCost: {
     type: Number,
     default: 0
   },
-  totalCost: {
+  purDiscount: {
     type: Number,
     default: 0
   }
@@ -42,24 +50,65 @@ const sellingSchema = new Schema({
     type: Object,
     required: true
   },
-  shippingPrice: {
-    type: Number,
-    required: true,
-    default: 0
-  },
   discount: {
     type: Number,
-    default: 0
-  },
-  totalPrice: {
-    type: Number,
-    required: true,
     default: 0
   },
   exRate: {
     type: Number,
     required: true,
     default: 24000
+  }
+})
+
+const itemSchema = new Schema({
+  product: {
+    type: Object,
+    required: true
+  },
+  color: {
+    type: Object,
+    required: true
+  },
+  size: {
+    type: String,
+    default: ''
+  },
+  qty: {
+    type: Number,
+    required: true
+  },
+  unitCost: {
+    type: Number,
+    required: true
+  },
+  itemCost: {
+    type: Number,
+    required: true
+  },
+  purTaxPct: {
+    type: Number,
+    required: true,
+    default: 0
+  },
+  weight: {
+    type: Number,
+    default: 0
+  },
+  unitDong: {
+    type: Number,
+    default: 0
+  },
+  unitShippingDong: {
+    type: Number,
+    default: 0
+  },
+  attachments: {
+    type: Array
+  },
+  note: {
+    type: String,
+    default: ''
   }
 })
 
@@ -80,6 +129,7 @@ const orderSchema = new Schema({
   selling: {
     type: sellingSchema
   },
+  items: [itemSchema],
   createdAt: {
     type: Date,
     default: Date.now

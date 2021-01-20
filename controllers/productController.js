@@ -96,7 +96,7 @@ exports.updateProductById = catchAsync(async (req, res, next) => {
   const { id } = req.params
   const reqBody = { ...req.body }
 
-  const updateProduct = await Product.findByIdAndUpdate(
+  const updatedProduct = await Product.findByIdAndUpdate(
     id, 
     reqBody, 
     { new: true, runValidators: true }
@@ -104,7 +104,7 @@ exports.updateProductById = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    byId: updateProduct
+    byId: updatedProduct
   })
 })
 
