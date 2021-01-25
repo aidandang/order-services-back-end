@@ -19,7 +19,7 @@ exports.readInventory = catchAsync(async (req, res, next) => {
           $eq: WAREHOUSE_NUMBER 
         },
         status: {
-          $in: ['ordered', 'received', 'packed']
+          $in: ['received', 'packed']
         }
       }
     }
@@ -27,7 +27,7 @@ exports.readInventory = catchAsync(async (req, res, next) => {
 
   // get itemss and sort by the orderNumber
   let itemQuery = Item.aggregate(itemAggregate)
-  itemQuery = itemQuery.sort('-orderNumber')
+  itemQuery = itemQuery.sort('-createdAt')
 
   const itemResult = await itemQuery
 

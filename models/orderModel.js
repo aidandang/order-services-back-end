@@ -119,6 +119,8 @@ const orderSchema = new Schema({
     enum: [
       'created', 
       'ordered',
+      'partial-received',
+      'received',
       'cancel'
     ],
     index: true

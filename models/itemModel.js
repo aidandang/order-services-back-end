@@ -2,89 +2,38 @@ const mongoose = require('mongoose'),
   Schema = mongoose.Schema
 
 const itemSchema = new Schema({
-  orderNumber: {
-    type: Number,
-    required: true,
-    index: true
-  },
   warehouseNumber: {
     type: Number,
     required: true,
     index: true
   },
-  product: {
-    type: Object,
-    required: true
-  },
-  color: {
-    type: Object,
-    required: true
-  },
-  size: {
+  recvTracking: {
     type: String,
-    default: ''
-  },
-  qty: {
-    type: Number,
     required: true
-  },
-  unitCost: {
-    type: Number,
-    required: true
-  },
-  itemCost: {
-    type: Number,
-    required: true
-  },
-  purTaxPct: {
-    type: Number,
-    required: true,
-    default: 0
-  },
-  weight: {
-    type: Number,
-    default: 0
-  },
-  unitDong: {
-    type: Number,
-    default: 0
-  },
-  unitShippingDong: {
-    type: Number,
-    default: 0
-  },
-  shippingDong: {
-    type: Number,
-    default: 0
-  },
-  exRate: {
-    type: Number,
-    required: true,
-    default: 24000
-  },
-  receivingNumber: {
-    type: String
   },
   recvDate: {
-    type: Date
-  },
-  shippingNumber: {
-    type: String,
-    default: ''
+    type: Date,
+    required: true
   },
   status: {
     type: String,
     required: true,
-    default: 'ordered',
-    enum: ['ordered', 'received', 'packed', 'shipped', 'delivered'],
+    default: 'received',
+    enum: ['received', 'packed', 'shipped', 'delivered', 'returned'],
     index: true
+  },
+  orderNumber: {
+    type: Number,
+    index: true
+  },
+  itemRef: {
+    type: Object
   },
   attachments: {
     type: Array
   },
   note: {
-    type: String,
-    default: ''
+    type: String
   }
 })
 
