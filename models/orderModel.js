@@ -116,13 +116,7 @@ const orderSchema = new Schema({
   status: {
     type: String,
     required: true,
-    enum: [
-      'created', 
-      'ordered',
-      'partial-received',
-      'received',
-      'cancel'
-    ],
+    enum: ['created', 'ordered', 'cancel'],
     index: true
   },
   purchasing: {

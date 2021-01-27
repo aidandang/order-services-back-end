@@ -6,12 +6,11 @@ exports.createTracking = catchAsync(async (req, res, next) => {
   const reqBody = [ ...req.body ]
 
   // create
-  const newtracking = await Receiving.insertMany(reqBody)
+  await Receiving.insertMany(reqBody)
 
   // response
   res.status(201).json({
-    status: 'success',
-    byId: newtracking
+    status: 'success'
   })
 })
 

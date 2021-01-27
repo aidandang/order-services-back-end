@@ -1,19 +1,8 @@
 const mongoose = require('mongoose'),
-  Schema = mongoose.Schema;
+  Schema = mongoose.Schema,
+  autoIncrement = require('mongoose-auto-increment')
 
-const recvItemSchema = new Schema({
-  qty: {
-    type: Number,
-    required: true
-  },
-  desc: {
-    type: String,
-    required: true
-  },
-  itemRef: {
-    type: String
-  }
-})
+autoIncrement.initialize(mongoose)
 
 const receivingSchema = new Schema({
   tracking: {
@@ -21,7 +10,7 @@ const receivingSchema = new Schema({
     required: true,
     unique: true
   },
-  recvDate: {
+  receivedDate: {
     type: Date,
     required: true
   },
@@ -29,23 +18,30 @@ const receivingSchema = new Schema({
     type: Number,
     required: true
   },
-  chkdDate: {
+  processedDate: {
     type: Date
   },
-  recvItems: [recvItemSchema],
-  procDate: {
+  returnedDate: {
     type: Date
   },
   status: {
     type: String,
-    enum: ['received', 'checked', 'processed'],
-    default: 'received'
+    enum: ['received', 'processed', 'returned'],
+    default: 'received',
+    required: true
   },
   createdAt: {
     type: Date,
     default: Date.now
   }
-});
+})
+
+receivingSchema.plugin(autoIncrement.plugin, {
+  model: 'Receiving',
+  field: 'receivingNumber',
+  startAt: 1,
+  incrementBy: 1
+})
 
 const Receiving = mongoose.model('Receiving', receivingSchema)
 
