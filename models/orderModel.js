@@ -4,6 +4,9 @@ const mongoose = require('mongoose'),
 
 autoIncrement.initialize(mongoose)
 
+// constants
+const WAREHOUSE_NUMBER = 1
+
 const purchasingSchema = new Schema({
   merchant: {
     type: Object,
@@ -113,10 +116,23 @@ const itemSchema = new Schema({
 })
 
 const orderSchema = new Schema({
+  warehouseNumber: {
+    type: Number,
+    required: true,
+    default: WAREHOUSE_NUMBER
+  },
   status: {
     type: String,
     required: true,
-    enum: ['created', 'ordered', 'cancel'],
+    enum: [
+      'created', 
+      'ordered',
+      'received',
+      'shipped',
+      'delivered', 
+      'returned', 
+      'cancel'
+    ],
     index: true
   },
   purchasing: {

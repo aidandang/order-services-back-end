@@ -5,12 +5,13 @@ const authController = require('../controllers/authController');
 
 router
   .route('/')
-  .get(receivingController.readTrackings)
-  .post(receivingController.createTracking);
+  .get(receivingController.readReceivings)
+  .post(receivingController.createReceiving);
 
 router
   .route('/:id')
-  .patch(receivingController.updateTracking)
+  .get(receivingController.readReceivingById)
+  .patch(receivingController.updateReceiving)
 //   .delete(receivingController.deleteTracking);
   
 module.exports = router;

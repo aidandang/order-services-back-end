@@ -2,7 +2,7 @@ const Receiving = require('../models/receivingModel')
 const catchAsync = require('../utils/catchAsync')
 const { getReceivings } = require('../aggregations/receivingAggregation')
 
-exports.createTracking = catchAsync(async (req, res, next) => {
+exports.createReceiving = catchAsync(async (req, res, next) => {
   const reqBody = [ ...req.body ]
 
   // create
@@ -14,7 +14,7 @@ exports.createTracking = catchAsync(async (req, res, next) => {
   })
 })
 
-exports.readTrackings = catchAsync(async (req, res, next) => {
+exports.readReceivings = catchAsync(async (req, res, next) => {
   const { tracking, status, recvDate, procDate } = req.query
   
   var match = null
@@ -99,7 +99,18 @@ exports.readTrackings = catchAsync(async (req, res, next) => {
   })
 })
 
-exports.updateTracking = catchAsync(async (req, res, next) => {
+exports.readReceivingById = catchAsync(async (req, res, next) => {
+  const { id } = req.params
+  
+  const receiving = await Receiving.findById(id)
+  
+  res.status(200).json({
+    status: 'success',
+    byId: receiving
+  })
+})
+
+exports.updateReceiving = catchAsync(async (req, res, next) => {
   const { id } = req.params
   const reqBody = req.body
 
