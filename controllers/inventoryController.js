@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const ObjectId = mongoose.Types.ObjectId
-const Item = require('../models/itemModel')
+const Order = require('../models/orderModel')
 const Receiving = require('../models/receivingModel');
 const catchAsync = require('../utils/catchAsync');
 
@@ -12,24 +12,24 @@ exports.readInventory = catchAsync(async (req, res, next) => {
   // items retured would be an empty array if not found
 
   // set the query
-  const itemAggregate = [
+  const orderAggregate = [
     { 
       $match: {
         warehouseNumber: {
           $eq: WAREHOUSE_NUMBER 
         },
         status: {
-          $in: ['received', 'packed']
+          $in: ['ordered', 'received']
         }
       }
     }
   ]
 
-  // get itemss and sort by the orderNumber
-  let itemQuery = Item.aggregate(itemAggregate)
-  itemQuery = itemQuery.sort('-createdAt')
+  // get orders
+  let orderQuery = Order.aggregate(orderAggregate)
+  orderQuery = orderQuery.sort('-createdAt')
 
-  const itemResult = await itemQuery
+  const orderResult = await orderQuery
 
   // find receiving trackings and response to the request if success,
   // items retured would be an empty array if not found
@@ -54,7 +54,7 @@ exports.readInventory = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    items: itemResult,
+    orders: orderResult,
     trackings: receivingResult
   });
 });
