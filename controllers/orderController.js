@@ -117,3 +117,28 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
     byId: updatedOrder
   })
 })
+
+exports.readOrdersForReceiving = catchAsync(async (req, res, next) => {
+  const match = {
+    status: {
+      $in: ['ordered', 'partial-received']
+    }
+  }
+
+  var query = Order.aggregate(getOrders(match))
+
+  // sort
+  if (req.query.sort) {
+    const sortBy = req.query.sort.split(',').join(' ')
+    query = query.sort(sortBy)
+  } else {
+    query = query.sort('-createdAt')
+  }
+
+  const orders = await query
+
+  res.status(200).json({
+    status: 'success',
+    allIds: orders
+  })
+})
