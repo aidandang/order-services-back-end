@@ -8,6 +8,10 @@ router
   .post(orderController.createOrder)
 
 router
+  .route('/receiving')
+  .get(orderController.readOrdersForReceiving)
+
+router
   .route('/:id')
   .get(orderController.readOrderById)
   .patch(orderController.updateOrderById)

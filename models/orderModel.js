@@ -112,6 +112,9 @@ const itemSchema = new Schema({
   note: {
     type: String,
     default: ''
+  },
+  recvTracking: {
+    type: String
   }
 })
 
@@ -127,10 +130,8 @@ const orderSchema = new Schema({
     enum: [
       'created', 
       'ordered',
+      'partial-received',
       'received',
-      'shipped',
-      'delivered', 
-      'returned', 
       'cancel'
     ],
     index: true
