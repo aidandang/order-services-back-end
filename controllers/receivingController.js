@@ -15,7 +15,7 @@ exports.createReceiving = catchAsync(async (req, res, next) => {
 })
 
 exports.readReceivings = catchAsync(async (req, res, next) => {
-  const { tracking, status, recvDate, procDate } = req.query
+  const { tracking, status, receivedDate, processedDate, returnedDate } = req.query
   
   var match = null
 
@@ -39,28 +39,38 @@ exports.readReceivings = catchAsync(async (req, res, next) => {
         } 
       } 
     }  
-  } else if (recvDate) {
+  } else if (receivedDate) {
     match = {
       '$expr': {
         $regexMatch: {
-          input: { $dateToString: { format: "%Y-%m-%d", date: "$recvDate" } },
-          regex: recvDate,
+          input: { $dateToString: { format: "%Y-%m-%d", date: "$receivedDate" } },
+          regex: receivedDate,
           options: "i"
         }
       }
     }
-  } else if (procDate) {
+  } else if (processedDate) {
     match = {
       '$expr': {
         $regexMatch: {
-          input: { $dateToString: { format: "%Y-%m-%d", date: "$procDate" } },
-          regex: procDate,
+          input: { $dateToString: { format: "%Y-%m-%d", date: "$processedDate" } },
+          regex: processedDate,
+          options: "i"
+        }
+      }
+    }
+  } else if (returnedDate) {
+    match = {
+      '$expr': {
+        $regexMatch: {
+          input: { $dateToString: { format: "%Y-%m-%d", date: "$returnedDate" } },
+          regex: returnedDate,
           options: "i"
         }
       }
     }
   }
-
+  
   if (match === null) {
     match = {}
   }
@@ -73,7 +83,7 @@ exports.readReceivings = catchAsync(async (req, res, next) => {
     const sortBy = req.query.sort.split(',').join(' ')
     query = query.sort(sortBy)
   } else {
-    query = query.sort('-recvDate')
+    query = query.sort('-receivedDate')
   }
 
   // pagination
@@ -87,7 +97,7 @@ exports.readReceivings = catchAsync(async (req, res, next) => {
 
   query = query.skip(skip).limit(limit)
 
-  const trackings = await query
+  const receivings = await query
 
   res.status(200).json({
     status: 'success',
@@ -95,7 +105,7 @@ exports.readReceivings = catchAsync(async (req, res, next) => {
       count: count,
       pages: pages
     },
-    allIds: trackings
+    allIds: receivings
   })
 })
 
@@ -115,7 +125,7 @@ exports.updateReceiving = catchAsync(async (req, res, next) => {
   const reqBody = req.body
 
   // update tracking
-  const tracking = await Receiving.findByIdAndUpdate(
+  const receiving = await Receiving.findByIdAndUpdate(
     id,
     reqBody,
     { new: true, runValidators: true }
@@ -123,6 +133,6 @@ exports.updateReceiving = catchAsync(async (req, res, next) => {
 
   res.status(200).json({
     status: 'success',
-    byId: tracking
+    byId: receiving
   })
 })

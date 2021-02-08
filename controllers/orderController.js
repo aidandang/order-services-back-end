@@ -121,7 +121,7 @@ exports.updateOrderById = catchAsync(async (req, res, next) => {
 exports.readOrdersForReceiving = catchAsync(async (req, res, next) => {
   const match = {
     status: {
-      $in: ['ordered', 'partial-received']
+      $in: ['partial-received', 'received']
     }
   }
 
