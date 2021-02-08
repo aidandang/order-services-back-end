@@ -114,7 +114,8 @@ const itemSchema = new Schema({
     default: ''
   },
   recvTracking: {
-    type: String
+    type: String,
+    default: ''
   }
 })
 
@@ -132,6 +133,7 @@ const orderSchema = new Schema({
       'ordered',
       'partial-received',
       'received',
+      'shipped',
       'cancel'
     ],
     index: true
