@@ -53,14 +53,18 @@ const sellingSchema = new Schema({
     type: Object,
     required: true
   },
+  totalDong: {
+    type: Number,
+    required: true,
+    default: 0
+  },
   discount: {
     type: Number,
     default: 0
   },
   exRate: {
     type: Number,
-    required: true,
-    default: 24000
+    required: true
   }
 })
 
